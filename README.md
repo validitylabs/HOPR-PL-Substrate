@@ -23,7 +23,7 @@ More precisely, in order to initiate and become part of the network, a HOPR node
 
 Once in a while, nodes would like to merge their local state with the global state. Therefore, they publish their accumulated state changes and ask the blockchain network to verify that state change. The verifiers in the network will check whether the local state changes of that particular node have led to valid state. 
 
-HOPR makes use of special behavior of distributed ledger systems that they can force senders to reveal pre-images of one-way functions like hash functions or elliptic curve operations into a transaction even if the result of the respective one-way function is necessary to verify the embedded signature.
+HOPR makes use of special behavior of distributed ledger systems that they can force senders of transactions to reveal pre-images of one-way functions like hash functions or elliptic curve operations into a transaction even if the only result of the respective one-way function is necessary to verify the embedded signature.
 
 ## Techniques
 ### Secret-sharing
