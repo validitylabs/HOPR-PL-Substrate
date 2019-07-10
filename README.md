@@ -5,7 +5,7 @@ A payment layer implementation of HOPR in Substrate
 ## Principles
 - Optimistic fair exchange:
 
-   optimize for the good case while sacrificing efficiency in the unhappy case
+   optimize for the happy case while sacrificing efficiency in the unhappy case
 
 - Keep computation for consensus-related state changes as low as possible
 
