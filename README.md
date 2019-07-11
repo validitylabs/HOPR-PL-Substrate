@@ -27,6 +27,7 @@ dApps, pillars, missing hole
 </table>
 
 role in the tech stack
+
 | Layer | Purpose | Examples |
 | ----- | ------- | -------- |
 | Application | Application logic | Chat app |
