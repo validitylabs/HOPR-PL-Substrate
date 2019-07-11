@@ -9,11 +9,11 @@ dApps, pillars, missing hole
 <table>
     <tbody>
         <tr>
-            <td colspan=2 align="middle"><b>Assets</b>
+            <td colspan=2 align="middle" width=33%><b>Assets</b>
             <br>Bitcoin, Ethereum, Polkadot, Cosmos</td>
-            <td colspan=2 align="middle"><b>Storage</b>
+            <td colspan=2 align="middle" width=33%><b>Storage</b>
             <br>Filecoin / IPFS</td>
-            <td colspan=2 align="middle"><b>Computation</b>
+            <td colspan=2 align="middle" width=33%><b>Computation</b>
             <br>Golem, Nucypher</td>
         </tr>
         <tr>
