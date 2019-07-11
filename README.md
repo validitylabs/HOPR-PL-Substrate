@@ -28,13 +28,42 @@ dApps, pillars, missing hole
 
 role in the tech stack
 
-| Layer | Purpose | Examples |
-| ----- | ------- | -------- |
-| Application | Application logic | Chat app |
-| Storage / Sync | Synchronisation of data, version management, medium-term message caching | [Matrix](https://matrix.org) |
-| **HOPR** | Scalable, decentralised metadata protection. Incentivisations for packet relayers and short-term packet caching. | n/a |
-| P2P | Overlay routing, NAT traversal | [libp2p](https://libp2p.io), [WebRTC](https://webrtc.org) |
-| Network | Underlay routing | [TCP / IP](https://en.wikipedia.org/wiki/Internet_protocol_suite), [QUIC](https://en.wikipedia.org/wiki/QUIC) |
+<table>
+    <thead>
+        <tr>
+            <td width=20%>Layer</td> 
+            <td width=60%>Purpose</td>
+            <td width=20%>Examples</td>
+        </tr>
+    <tbody>
+        <tr>
+            <td>Application</td>
+            <td>Application logic</td>
+            <td>Chat app</td>
+        </tr>
+        <tr>
+            <td>Storage / Sync</td>
+            <td>Synchronisation of data, version management, medium-term message caching</td>
+            <td><a href="https://matrix.org">Matrix</a></td>
+        </tr>
+        <tr>
+            <td><b>HOPR</b></td>
+            <td>Scalable, decentralised metadata protection. Incentivisations for packet relayers and short-term packet caching.</td>
+            <td>n/a</td>
+        </tr>
+        <tr>
+            <td>P2P</td>
+            <td>Overlay routing, NAT traversal</td>
+            <td><a href="https://libp2p.io">libp2p</a>, <a href="https://webrtc.org">WebRTC</a></td>
+        </td>
+        <tr>
+            <td>Network</td>
+            <td>Underlay routing, congestion control</td>
+            <td><a href="https://en.wikipedia.org/wiki/Internet_protocol_suite">TCP / IP</a>, <a href="https://en.wikipedia.org/wiki/QUIC">QUIC</a></td>
+        </tr>
+    </tbody>
+</table>
+
 Whisper -> HOPR
 
 # Architecture
