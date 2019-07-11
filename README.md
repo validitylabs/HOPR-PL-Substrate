@@ -31,9 +31,9 @@ role in the tech stack
 <table>
     <thead>
         <tr>
-            <td width=20%>Layer</td> 
-            <td width=60%>Purpose</td>
-            <td width=20%>Examples</td>
+            <td width=20%><b>Layer</b></td> 
+            <td width=60%><b>Purpose</b></td>
+            <td width=20%><b>Examples</b></td>
         </tr>
     <tbody>
         <tr>
@@ -99,19 +99,25 @@ HOPR makes use of special behavior of distributed ledger systems that they can f
 
 ## Techniques
 
-Each hop possesses a key pair which is also used as an address of that node. Once a hop receives a packet, it multiplies the embedded curve point with its own private key and derives the intermediate keying material (IKM).
+Each hop possesses a key pair which is also used as an address of that node. Once a hop receives a packet, it multiplies the embedded curve point with its own private key and derives the intermediate keying material (IKM). The nodes will use that keying material to multiple derive keys that are necessary to process the packet.
 
 ### Secret-sharing
 
-HOPR uses a secret sharing scheme.
-
-### Signature verification
+The IKM is used to derive a key share s_a per incoming packet and another key share s_b per outgoing packet. Outgoing key share s_b and incoming key share s_a of the next downstream node yield a key that will be used to the pre-image of the key that is necessary to redeem the money.
 
 ### Payment channel update transactions
 
-### Verification of hash values
+concept payment channel nonce, time to present better transaction
 
-### Verification of group operations
+### Signature verification
+
+Every time a node sends a packet to the next downstream node, it creates an update transaction that updates the state of the payment channel. The transaction contains not only the amount that is transferrred but also an elliptic curve point. The signature is computed over the transaction data as well as the curve point, so once a node receives that transaction, it can verify whether the signature is correct without requiring any additional helping values. However, the on-chain application logic accepts that update transaction only if the sender of the transaction is able to present either a value that solves the discrete logarithm problem for that point or renounce a fraction of the received money.
+
+The reason for this is that the payment between a node and the next downstream node relies on the acknowledgments that this node receives from those nodes to which it forwards the messages. More precisely, the settlement and therefore the payout depends on the behavior of third parties. 
+
+% TODO: more details
+
+### Verification of hash values
 
 # Message Layer
 
