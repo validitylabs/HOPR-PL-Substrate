@@ -1,10 +1,8 @@
 # HOPR-PL-Substrate
 
-A payment layer implementation of HOPR in Substrate
+A payment layer implementation of HOPR in Substrate.
 
 # Objectives
-
-dApps, pillars, missing hole
 
 We see the Web3 as an ecosystem of decentralised asset systems like Polkadot and Ethereum, decentralised storage solutions like Filecoin or NuCypher as well as decentralised computation providers like Golem or Enigma. In this new ecosystem, there will be multiple decentralised applications (dApps) which will interact with these systems.
 
@@ -72,6 +70,8 @@ HOPR will fill the missing hole between p2p networks and dApps that exchange sen
 
 # Architecture
 
+HOPR is structured into multiple layers: an API facing applications that will be built with HOPR, a message layer which performs the cryptographic operations that ensure privacy of the network participants, as well as a payment layer that assembles HOPR with a distributed ledger system. HOPR will have an internal API that is used to build modules that connect HOPR nodes to DLT like Polkadot / Substrate and Ethereum.
+
 <table>
     <tbody>
         <tr>
@@ -80,7 +80,7 @@ HOPR will fill the missing hole between p2p networks and dApps that exchange sen
         </tr>
         <tr>
             <td rowspan=3><b>HOPR</b></td>
-            <td><b>API</b><td>
+            <td><b>API</b></td>
         </tr>
         <tr>
             <td><b>Messaging layer</b></td>
@@ -95,28 +95,26 @@ HOPR will fill the missing hole between p2p networks and dApps that exchange sen
     </tbody>
 </table>
 
+For details concerning the messaging layer, we refer to the [HOPR repository](https://github.com/validitylabs/hopr).
+
 # Payment Layer
 
-## Principles
+Privacy comes from the service of others. We therefore allow parties to have serious business model in providing that kind of service to individuals.
 
-- Optimistic fair exchange:
+The main architectural guidelines behind HOPR are:
 
-  optimize for the happy case while sacrificing efficiency in the unhappy case
+- **simplicity**: The interactions with the blockchain should be as simple as possible to prevent mistakes in applications and to decrease the effort that is necessary to formally proof security properties of the system.
+- **efficiency**: As on-chain computation is costly, we prevent expensive operations like NIZK proof verification whereever we can.
 
-- Keep computation for consensus-related state changes as low as possible
+We also made a few design choices:
+- optimisation for the **happy case**: We sacrifice some efficiency in the unhappy case for an extra small overhead in the happy case.
+- **near-real-time** instead of real-time communication: Message delivery in the HOPR network will have a slightly higher latency than direct communication as this is necessary to ensure privacy but it should not be higher than *1 second*.
 
-  nodes do not need on-chain state changes for every relayed packet. On-chain state are only required once they stake funds or they initiate a payout for multiple relayed packets.
-  On-chain state changes require only verification of hash values, signature verification, repeated application of the group operation, e.g. on elliptic curves
-
-- Chain-agnostic
-
-  payment layer and messaging layer do not depend on a specific chain. The only requirement is a general-purpose on-chain scripting programming language in combination with a sufficiently high instruction limit.
-
-## Role of the blockchain resp. Polkadot
+## Role of the blockchain resp. Polkadot for HOPR
 
 Each node in the network is able to alter its local state independently. It can then convince other nodes of the validity of the state change. Other nodes may then use the advertised state change as well as the global state upon which a consensus has been reached to check the plausibility. If a node found a state change appropriate, it will most likely perform the requested actions.
 
-More precisely, in order to initiate and become part of the network, a HOPR node will lock a certain amount of funds and publish that state change to the network. Once it aims to send a message, it will create a local state change that moves a small amount of funds from its own account to the account of a node that will relay the message towards the desired recipient. That node checks now whether the sender has indeed locked enough funds for that value transfer. Furthermore, that node checks whether that state change is currently the most recent state that follows the previously known state. As HOPR nodes increment counters on every change, the first relayer will accept, when coming from state **n**, only a state change to state **n+1**. In particular, it will reject a second state change to state **n+1**.
+More precisely, in order to initiate and become part of the network, a HOPR node will lock a certain amount of funds and publish that state change to the network. Once it aims to send a message, it will create a local state change that moves a small amount of funds from its own account to the account of a node that will relay the message towards the desired recipient. That node checks now whether the sender has indeed locked enough funds for that value transfer. Furthermore, that node checks whether that state change is currently the most recent state that follows the previously known state. As HOPR nodes increment counters on every change, the first relayer will accept, when coming from state *n*, only a state change to state *n+1*. In particular, it will reject a second state change attempt to state *n+1*.
 
 Once in a while, nodes would like to merge their local state with the global state. Therefore, they publish their accumulated state changes and ask the blockchain network to verify that state change. The verifiers in the network will check whether the local state changes of that particular node have led to valid state.
 
