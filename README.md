@@ -83,7 +83,7 @@ HOPR is structured into multiple layers: an API facing applications that will be
             <td><b>API</b></td>
         </tr>
         <tr>
-            <td><b>Messaging layer</b></td>
+            <td><b>Message layer</b></td>
         </tr>
         <tr>
             <td><b>Payment layer</b></td>
@@ -95,7 +95,7 @@ HOPR is structured into multiple layers: an API facing applications that will be
     </tbody>
 </table>
 
-For details concerning the messaging layer, we refer to the [HOPR repository](https://github.com/validitylabs/hopr).
+For details concerning the messaging layer and especially the packet format, we refer to the [HOPR repository](https://github.com/validitylabs/hopr).
 
 # Payment Layer
 
@@ -108,7 +108,7 @@ The main architectural guidelines behind HOPR are:
 
 We also made a few design choices:
 - optimisation for the **happy case**: We sacrifice some efficiency in the unhappy case for an extra small overhead in the happy case.
-- **near-real-time** instead of real-time communication: Message delivery in the HOPR network will have a slightly higher latency than direct communication as this is necessary to ensure privacy but it should not be higher than *1 second*.
+- **near-real-time** instead of real-time communication: Message delivery in the HOPR network will have a slightly higher latency than direct communication as this is necessary to ensure privacy but it will be strictly lower than *1 second*.
 
 ## Role of the blockchain resp. Polkadot for HOPR
 
@@ -130,18 +130,24 @@ The IKM is used to derive a key share s_a per incoming packet and another key sh
 
 ### Payment channel update transactions
 
-concept payment channel nonce, time to present better transaction
+HOPR uses payment channels between adjacent nodes in the network and routes payments along these edges. During the initialisation phase, each node will crawl the network in order to find others who are also willing to speak the HOPR protocol. They will then select from the set of received a subset of nodes with whom they establish a payment channel.
+
+Initialising a payment channel means that two participants agree on a certain amount of assets from each of them and lock these assets until both of them agree on how to distribute them. In case they do not find a consensus, they always have the chance to restore the original distribution.
+
+Once they agree on a new distribution, they sign a message that encodes the new state and store this transaction until either one of them initiates a payout or they agree on another distribution.
+
+State changes are incrementally numbered such that an honest node will always be able to convince the distributed ledger from rightful most recent state of the payment channel. In order to give nodes that opportunity, each node will listen the payment channel closing event and are allowed within a predetermined amount of time to present a more recent transaction.
 
 ### Signature verification
 
-Every time a node sends a packet to the next downstream node, it creates an update transaction that updates the state of the payment channel. The transaction contains not only the amount that is transferrred but also an elliptic curve point. The signature is computed over the transaction data as well as the curve point, so once a node receives that transaction, it can verify whether the signature is correct without requiring any additional helping values. However, the on-chain application logic accepts that update transaction only if the sender of the transaction is able to present either a value that solves the discrete logarithm problem for that point or renounce a fraction of the received money.
+Every time a node sends a packet to the next downstream node, it creates an *update transaction* that alters the state of the payment channel. The transaction contains not only the amount that is transferrred but also an elliptic curve point. The signature is computed over the transaction data as well as the curve point, so once a node receives that transaction, it can verify whether the signature is correct without requiring any additional helping values. However, the on-chain application logic accepts that update transaction only if the sender of the transaction is able to present either a value that solves the discrete logarithm problem for that point or renounce a fraction of the received money.
 
-The reason for this is that the payment between a node and the next downstream node relies on the acknowledgments that this node receives from those nodes to which it forwards the messages. More precisely, the settlement and therefore the payout depends on the behavior of third parties. 
-
-% TODO: more details
-
-### Verification of hash values
+The reason for this mechanism is that the payment channel between a node and the next downstream node relies on the acknowledgments that this node receives from those nodes to which it forwards the messages. More precisely, the settlement and therefore the payout depends on the behavior of third parties. As this contradicts the principle of a payment channel between exactly two parties, both nodes need to be able to settle their payment channel even when others do not acknowledge the reception of packet in time.
 
 # Message Layer
 
-## Acknowledgements
+The goal of the payment layer is to incentivise operations in the message layer. In order to do that, we specify those actions we want to pay nodes for:
+- correct transformation of packets such that the next downstream nodes is able to perform their transformations on the received packets
+- delivery of the packet to the next node and caching the packet for a small amount of time, e. g. 2 hours, until the next downstream node is able to receive the packet.
+
+The only party who can prove this is the next downstream node by acknowledging the reception and the validity of the packet. For that reason, the sender prepares while creating the whole packet several secrets that are derivable by the nodes along the path. These secrets are then used to create a two-out-of-two secret sharing between every two adjacent nodes along the path. The sender then applies a one-way function on the second key share and embeds that value in the part of the packet that is visible to the first node. This allows the first node to check whether the derived value and the value which it is going to receive from the next downstream node are sufficient to reconstruct the secret that is embedded in the secret sharing. It also allows the first node to challenge the second node for sending back the desired secret share. And in case the second node answers with an invalid acknowledgement, it gives the first node an evidence to prove towards the distributed ledger that the acknowledgement was invalid.
