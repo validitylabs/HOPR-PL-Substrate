@@ -6,6 +6,10 @@ A payment layer implementation of HOPR in Substrate
 
 dApps, pillars, missing hole
 
+We see the Web3 as an ecosystem of decentralised asset systems like Polkadot and Ethereum, decentralised storage solutions like Filecoin or NuCypher as well as decentralised computation providers like Golem or Enigma. In this new ecosystem, there will be multiple decentralised applications (dApps) which will interact with these systems.
+
+In order to deliver messages that are sent by dApps, most of them make at the moment use of Whisper which was developed by Ethereum community and suffers from certain shortcomings like missing scalability and unclear delivery behavior.
+
 <table>
     <tbody>
         <tr>
@@ -26,7 +30,9 @@ dApps, pillars, missing hole
     </tbody>
 </table>
 
-role in the tech stack
+We also see that messages exchanged by dApps will be of value and that its perception will reveal sensible information to potential attackers. For that reason, we are designing a messaging system that adds privacy on the network level and allows dApps to communicate with each other privately.
+
+HOPR will fill the missing hole between p2p networks and dApps that exchange sensible information.
 
 <table>
     <thead>
@@ -47,9 +53,9 @@ role in the tech stack
             <td><a href="https://matrix.org">Matrix</a></td>
         </tr>
         <tr>
-            <td><b>HOPR</b></td>
+            <td><b>Privacy</b></td>
             <td>Scalable, decentralised metadata protection. Incentivisations for packet relayers and short-term packet caching.</td>
-            <td>n/a</td>
+            <td><b>HOPR</b></td>
         </tr>
         <tr>
             <td>P2P</td>
@@ -64,11 +70,30 @@ role in the tech stack
     </tbody>
 </table>
 
-Whisper -> HOPR
-
 # Architecture
 
-Messaging layer / Payment layer
+<table>
+    <tbody>
+        <tr>
+            <td>Application(s)</td>
+            <td>CLI/UI</td>
+        </tr>
+        <tr>
+            <td rowspan=3><b>HOPR</b></td>
+            <td><b>API</b><td>
+        </tr>
+        <tr>
+            <td><b>Messaging layer</b></td>
+        </tr>
+        <tr>
+            <td><b>Payment layer</b></td>
+        </tr>
+        <tr>
+            <td>Polkadot</td>
+            <td>Distributed ledger</td>
+        </tr>
+    </tbody>
+</table>
 
 # Payment Layer
 
