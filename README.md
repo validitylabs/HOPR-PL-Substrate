@@ -147,8 +147,8 @@ The reason for this mechanism is that the payment channel between a node and the
 # Message Layer
 
 The goal of the payment layer is to incentivise operations in the message layer. In order to do that, we specify those actions we want to pay nodes for:
-- correct transformation of packets such that the next downstream nodes is able to perform their transformations on the received packets
-- delivery of the packet to the next node and caching the packet for a small amount of time, e. g. 2 hours, until the next downstream node is able to receive the packet.
+- **correct transformation** of packets such that the next downstream nodes is able to perform their transformations on the received packets
+- **delivery of the packet** to the next node and caching the packet for a small amount of time, e. g. 2 hours, until the next downstream node is able to receive the packet.
 
 The only party who can prove this is the next downstream node by acknowledging the reception and the validity of the packet. For that reason, the sender prepares while creating the whole packet several secrets that are derivable by the nodes along the path. These secrets are then used to create a two-out-of-two secret sharing between every two adjacent nodes along the path. The sender then applies a one-way function on the second key share and embeds that value in the part of the packet that is visible to the first node. This allows the first node to check whether the derived value and the value which it is going to receive from the next downstream node are sufficient to reconstruct the secret that is embedded in the secret sharing. It also allows the first node to challenge the second node for sending back the desired secret share. And in case the second node answers with an invalid acknowledgement, it gives the first node an evidence to prove towards the distributed ledger that the acknowledgement was invalid.
 
