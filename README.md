@@ -4,9 +4,9 @@ A payment layer implementation of HOPR in Substrate.
 
 # Objectives
 
-We see the Web3 as an ecosystem of decentralised asset systems like Polkadot and Ethereum, decentralised storage solutions like Filecoin or NuCypher as well as decentralised computation providers like Golem or Enigma. In this new ecosystem, there will be multiple decentralised applications (dApps) which will interact with these systems.
+We see the Web3 as an ecosystem of decentralised asset systems like Polkadot and Ethereum, decentralised storage solutions like Filecoin or NuCypher as well as decentralised computation providers like Golem or Enigma. In this new ecosystem, there will be multiple decentralised applications (dApps) which will interact with each other as well as with these systems.
 
-In order to deliver messages that are sent by dApps, most of them make at the moment use of Whisper which was developed by Ethereum community and suffers from certain shortcomings like missing scalability and unclear delivery behavior.
+In order to deliver messages that are sent by dApps, at the moment most of them make use of Whisper which was developed by Ethereum community and suffers from certain shortcomings like missing scalability and unclear delivery behavior.
 
 <table>
     <tbody>
@@ -70,7 +70,7 @@ HOPR will fill the missing hole between p2p networks and dApps that exchange sen
 
 # Architecture
 
-HOPR is structured into multiple layers: an API facing applications that will be built with HOPR, a message layer which performs the cryptographic operations that ensure privacy of the network participants, as well as a payment layer that assembles HOPR with a distributed ledger system. HOPR will have an internal API that is used to build modules that connect HOPR nodes to DLT like Polkadot / Substrate and Ethereum.
+HOPR is structured into multiple layers: an API facing applications that will be built with HOPR, a message layer which performs the cryptographic operations that ensure privacy of the network participants, as well as a payment layer that assembles HOPR with a distributed ledger system. HOPR will have an internal API that is used to build modules that connect HOPR nodes to distributed ledgers like Polkadot / Substrate and Ethereum.
 
 <table>
     <tbody>
@@ -99,9 +99,9 @@ For details concerning the messaging layer and especially the packet format, we 
 
 # Payment Layer
 
-Privacy comes from the service of others. We therefore allow parties to have serious business model in providing that kind of service to individuals.
+Privacy comes from the service of others. We therefore allow parties to have a serious business model in providing that kind of service to individuals or dApps.
 
-The main architectural guidelines behind HOPR are:
+The main architectural guidelines regarding HOPR are:
 
 - **simplicity**: The interactions with the blockchain should be as simple as possible to prevent mistakes in applications and to decrease the effort that is necessary to formally proof security properties of the system.
 - **efficiency**: As on-chain computation is costly, we prevent expensive operations like NIZK proof verification whereever we can.
@@ -122,11 +122,11 @@ HOPR makes use of special behavior of distributed ledger systems that they can f
 
 ## Techniques
 
-Each hop possesses a key pair which is also used as an address of that node. Once a hop receives a packet, it multiplies the embedded curve point with its own private key and derives the intermediate keying material (IKM). The nodes will use that keying material to multiple derive keys that are necessary to process the packet.
+Each hop possesses a key pair which is also used as an address of that node. Once a hop receives a packet, it multiplies the embedded curve point with its own private key and derives the Intermediate Keying Material (IKM). The nodes will use that keying material to derive multiple keys that are necessary to process the packet.
 
 ### Secret-sharing
 
-The IKM is used to derive a key share s_a per incoming packet and another key share s_b per outgoing packet. Outgoing key share s_b and incoming key share s_a of the next downstream node yield a key that will be used to the pre-image of the key that is necessary to redeem the money.
+The IKM is used to derive a key share *s_a* per incoming packet and another key share *s_b* per outgoing packet. Outgoing key share *s_b* and incoming key share *s_a* of the next downstream node yield a key that will be used to the pre-image of the key that is necessary to redeem the money.
 
 ### Payment channel update transactions
 
