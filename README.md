@@ -182,13 +182,13 @@ The accounting scheme will consist of only one application logic that is current
 - **Slashing for stupid acknowledgements:**
    Nodes can determine the invalidity of acknowledgements. They can further create a transaction that proves this invalidity to the on-chain application logic. The on-chain logic is able check the validity of that claim and it is able to slash the corresponding node.
 
-- Payment channel routing:
+- **Payment channel routing:**
    Nodes can use the global state to sample a route of connected nodes through the HOPR network.
 
-- Polkadot slot leasing:
+- **Polkadot slot leasing:**
    There is a proper way to collect Dots, i. e. by swapping HOPR tokens into Dots in order to lease a slot in Polkadot and get Polkadot's "pooled security".
 
-- Modularisation:
+- **Modularisation:**
    HOPR is modularised in a common message layer and multiple payment layer modules, Polkadot and Ethereum. The implementations live in seperate repositories.
 
 # API - [TODO]
