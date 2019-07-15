@@ -151,3 +151,44 @@ The goal of the payment layer is to incentivise operations in the message layer.
 - delivery of the packet to the next node and caching the packet for a small amount of time, e. g. 2 hours, until the next downstream node is able to receive the packet.
 
 The only party who can prove this is the next downstream node by acknowledging the reception and the validity of the packet. For that reason, the sender prepares while creating the whole packet several secrets that are derivable by the nodes along the path. These secrets are then used to create a two-out-of-two secret sharing between every two adjacent nodes along the path. The sender then applies a one-way function on the second key share and embeds that value in the part of the packet that is visible to the first node. This allows the first node to check whether the derived value and the value which it is going to receive from the next downstream node are sufficient to reconstruct the secret that is embedded in the secret sharing. It also allows the first node to challenge the second node for sending back the desired secret share. And in case the second node answers with an invalid acknowledgement, it gives the first node an evidence to prove towards the distributed ledger that the acknowledgement was invalid.
+
+# Details of the Polkadot integration
+HOPR will use Substrate to implement the Polkadot integration. The application logic will be similar to the one that we have generated for the Ethereum Virtual Machine (EVM).
+
+## General architecture
+HOPR chain will use a custom application logic that is implemented in Rust as an SRML module und compiled either to binary code or to WebAssembly. Normal nodes will run native Rust code whilst outdated / not updated nodes will fetch the WebAssembly from the blockchain and run that code.
+
+The accounting scheme will consist of only one application logic that is currently valid. Therefore, HOPR chain will not need the *contract* module. Apart from this, the efficiency of a native module is a lot better than a WebAssembly smart contract.
+
+## Roadmap:
+- Small dummy testnet:
+   Set up a small chain network with >1 participants and some dummy functionality. There is a very basic Javascript API to trigger dummy functionality and trigger resp. observe actions.
+
+- Application logic deployment:
+   The dummy application logic can be compiled to Rust binary code and Webassembly. It is possible to store the compiled application logic in a block and outdated clients can execute that functionality by using the WASM interpreter wasmi. Once they are updated, the will use native Rust code. There is an API call that allows the message layer to check whether we are running the latest application code or not.
+
+- Fungible token:
+   There is a fungible asset. Users can transfer that asset to other users. They can stake that asset for future use in HOPR.
+
+- Basic payment channels:
+   Users can open and close basic payment channels. There are events showing state changes of payment channels. The message layer can listen to these events.
+
+- Additively homomorphic payment channels:
+   The application logic can verify the elliptic curve operations. It accepts redacted payment channel settlement request and is able to check the validity of them. The message layer can publish state changes and listens to events.
+
+- Coordinated payout scheme:
+   Parties cannot payout more tokens than intended from a payment channel. More precisely, debts due to overpayment to colluding nodes does not result in financial benefit. The message emit warnings when trying to perform inappropriate actions.
+
+- Slashing for stupid acknowledgements:
+   Nodes can determine the invalidity of acknowledgements. They can further create a transaction that proves this invalidity to the on-chain application logic. The on-chain logic is able check the validity of that claim and it is able to slash the corresponding node.
+
+- Payment channel routing:
+   Nodes can use the global state to sample a route of connected nodes through the HOPR network.
+
+- Polkadot slot leasing:
+   There is a proper way to collect Dots, i. e. by swapping HOPR tokens into Dots in order to lease a slot in Polkadot and get Polkadot's "pooled security".
+
+- Modularisation:
+   HOPR is modularised in a common message layer and multiple payment layer modules, Polkadot and Ethereum. The implementations live in seperate repositories.
+
+# API - [TODO]
