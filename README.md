@@ -161,25 +161,25 @@ HOPR chain will use a custom application logic that is implemented in Rust as an
 The accounting scheme will consist of only one application logic that is currently valid. Therefore, HOPR chain will not need the *contract* module. Apart from this, the efficiency of a native module is a lot better than a WebAssembly smart contract.
 
 ## Roadmap:
-- Small dummy testnet:
+- **Small dummy testnet:**
    Set up a small chain network with >1 participants and some dummy functionality. There is a very basic Javascript API to trigger dummy functionality and trigger resp. observe actions.
 
-- Application logic deployment:
+- **Application logic deployment:**
    The dummy application logic can be compiled to Rust binary code and Webassembly. It is possible to store the compiled application logic in a block and outdated clients can execute that functionality by using the WASM interpreter wasmi. Once they are updated, the will use native Rust code. There is an API call that allows the message layer to check whether we are running the latest application code or not.
 
-- Fungible token:
+- **Fungible token:**
    There is a fungible asset. Users can transfer that asset to other users. They can stake that asset for future use in HOPR.
 
-- Basic payment channels:
+- **Basic payment channels:**
    Users can open and close basic payment channels. There are events showing state changes of payment channels. The message layer can listen to these events.
 
-- Additively homomorphic payment channels:
+- **Additively homomorphic payment channels:**
    The application logic can verify the elliptic curve operations. It accepts redacted payment channel settlement request and is able to check the validity of them. The message layer can publish state changes and listens to events.
 
-- Coordinated payout scheme:
+- **Coordinated payout scheme:**
    Parties cannot payout more tokens than intended from a payment channel. More precisely, debts due to overpayment to colluding nodes does not result in financial benefit. The message emit warnings when trying to perform inappropriate actions.
 
-- Slashing for stupid acknowledgements:
+- **Slashing for stupid acknowledgements:**
    Nodes can determine the invalidity of acknowledgements. They can further create a transaction that proves this invalidity to the on-chain application logic. The on-chain logic is able check the validity of that claim and it is able to slash the corresponding node.
 
 - Payment channel routing:
