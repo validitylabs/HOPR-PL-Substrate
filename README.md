@@ -191,4 +191,26 @@ The accounting scheme will consist of only one application logic that is current
 - **Modularisation:**
    HOPR is modularised in a common message layer and multiple payment layer modules, Polkadot and Ethereum. The implementations live in seperate repositories.
 
-# API - [TODO]
+# API
+The payment channel module keeps track of open payment channels and store the relevant information persistently.
+
+## `create`(id: string, signingProvider: SigningProvider): Promise\<PaymentModule\>
+Initiates the payment layer module and restores the information of the payment channels that are open at the moment.
+- `id` the HOPR id of the node. The information is used to derive the `channelId`
+- `signingProvider.sign(msg: string)` 
+
+## getChannelId()
+
+## openChannel()
+
+## closeChannel()
+
+## createTransaction()
+
+## checkTransaction()
+
+## getEmbeddedMoney()
+
+## initiatePayout()
+
+## stakeMoney()
