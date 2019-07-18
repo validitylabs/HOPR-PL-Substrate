@@ -194,7 +194,7 @@ The accounting scheme will consist of only one application logic that is current
 # API
 The payment channel module keeps track of open payment channels and store the relevant information persistently.
 
-## `create`(id: string, signingProvider: SigningProvider): Promise\<PaymentModule\>
+## create(**id**: string, **signingProvider**: SigningProvider): Promise\<PaymentModule\>
 Initiates the payment layer module and restores the information of the payment channels that are open at the moment.
 - `id` the HOPR id of the node. The information is used to derive the `channelId`
 - `signingProvider.sign(msg: string)` 
