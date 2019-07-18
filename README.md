@@ -197,6 +197,7 @@ The accounting scheme will consist of only one application logic that is current
 Once a party decides to be part of the HOPR network, it will first create or recover an identity. It will then publish that identity and the corresponding key files to the network such that other participants are able to find that node.
 
 That node will then crawl the network to find other nodes in the HOPR network. It will then select a well-known subset of the received nodes and establish a payment channel with them. By doing that, it will broadcast the fact that there is a payment channel connection between these two nodes.
+
 [<img height=450px src="img/HOPR-init.svg">]()
 
 ## Message relaying
@@ -205,6 +206,7 @@ In order to send a message through the HOPR network, the node will first crawl t
 That hop will receive the packet and checks whether it is the designated recipient of that packet. If that is the case, it will display the message, otherwise it will check whether the cryptographic packet format is correct and whether the embedded is valid and whether there is a record in the blockchain of that particular payment channel. In case everything is alright, it will transform the packet such that the next downstream node is able to process it carefully.
 
 The node will also send an acknowledgement back to the previous node which allows that node to compute the keys that are necessary to initate a payout of the corresponding payment channel.
+
 [<img height=450px src="img/HOPR-message-relay.svg">]()
 
 ## Payout
@@ -215,6 +217,7 @@ In case everything is fine, the application logic will create an event that is o
 The on-chain application will give the participants some timeframe that they can use to publish transaction that fit better for them. Once that time interval is due, the initiator of the payout will create a transaction that transfers the assets back to both parties.
 
 To prevent collusion attacks, the nodes need to close all payment channel before they are able to get their assets out of HOPR.
+
 [<img height=450px src="img/HOPR-payout.svg">]()
 
 
