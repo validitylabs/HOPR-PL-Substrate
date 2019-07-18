@@ -156,7 +156,7 @@ The only party who can prove this is the next downstream node by acknowledging t
 HOPR will use Substrate to implement the Polkadot integration. The application logic will be similar to the one that we have generated for the Ethereum Virtual Machine (EVM).
 
 ## General architecture
-HOPR chain will use a custom application logic that is implemented in Rust as an SRML module und compiled either to binary code or to WebAssembly. Normal nodes will run native Rust code whilst outdated / not updated nodes will fetch the WebAssembly from the blockchain and run that code.
+HOPR chain will use a custom application logic that is implemented in Rust as an SRML module und compiled either to binary code or to WebAssembly. Normal nodes will run native Rust code whilst outdated / not updated nodes will fetch the WebAssembly code from the blockchain and run that code.
 
 The accounting scheme will consist of only one application logic that is currently valid. Therefore, HOPR chain will not need the *contract* module. Apart from this, the efficiency of a native module is a lot better than a WebAssembly smart contract.
 
