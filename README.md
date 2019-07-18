@@ -192,25 +192,44 @@ The accounting scheme will consist of only one application logic that is current
    HOPR is modularised in a common message layer and multiple payment layer modules, Polkadot and Ethereum. The implementations live in seperate repositories.
 
 # API
+**Disclaimer: the API might change over time**
+
 The payment channel module keeps track of open payment channels and store the relevant information persistently.
 
-## create(**id**: string, **signingProvider**: SigningProvider): Promise\<PaymentModule\>
+## create(id: string, signingProvider: SigningProvider): Promise\<PaymentModule\>
 Initiates the payment layer module and restores the information of the payment channels that are open at the moment.
 - `id` the HOPR id of the node. The information is used to derive the `channelId`
 - `signingProvider.sign(msg: string)` 
 
-## getChannelId()
+## getChannelId(from?: Address, to: Address): string
+Computes the identifier for the channel between `from` and `to`. The identifier SHOULD be chosen in a way such that `to` and `from` commute. If no `from` is given, it MUST take the own address.
+- `from` a HOPR address 
+- `to` another HOPR address
 
-## openChannel()
+## openChannel(counterparty: Address): Promise\<Receipt\>
+Manually opens a payment channel with `counterparty`. It SHOULD resolve after the corresponding state change has been published to the network and after that state change has been confirmed. It MUST return a receipt for the state change.
+- `counterparty` address of the other party that will participate in that channel
 
-## closeChannel()
+## closeChannel(counterparty: Address): Promise\<Receipt\>
+Manually closes a payment channel with `counterparty`. It SHOULD resolve after the corresponding state change has been published to the network and after that state change has been confirmed. It MUST return a receipt for the state change.
+- `counterparty` address of the other party that is part of that channel
 
-## createTransaction()
+## createTransaction(to: Address, amount: BigInt | string): Promise\<Transaction\>
+Creates a transaction of `amount` assets to the account of `to`. The signature of that transaction SHOULD be computed over the result of a one-way function such that the on-chain application logic can force the sender to reveal the pre-image of that value.
+- `to` the HOPR address of the counterparty
+- `amount` amount of assets that are transferred to `to`. The value MUST NOT be given as a Number due to the precision limitations of programming languages.
 
-## checkTransaction()
+## checkTransaction(tx: Transaction): boolean
+Check whether a given transaction is valid. It MUST check the signature and it MUST check whether the amount is satisfactory.
+- `tx` the transaction to check
 
-## getEmbeddedMoney()
+## getEmbeddedMoney(tx: Transaction): BigInt
+Returns the amount of assets that are embedded in the given transaction.
+- `tx` the transaction to extract the transferred amount from
 
-## initiatePayout()
+## initiatePayout(): Promise\<BigInt\>
+Initiates a payout of all payment channels. It MUST close all payment channels and resolve just when all payment channels are either closed or considered abandonned. It SHOULD return the amount of assets that has been received by the HOPR node.
 
-## stakeMoney()
+## stakeMoney(amount: BigInt): Promise\<Receipt\>
+Locks money in the application logic such that it is later available to open payment channels.
+- `amount` the amount of assets to deposit in the on-chain application logic.
