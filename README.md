@@ -192,7 +192,7 @@ The accounting scheme will consist of only one application logic that is current
    HOPR is modularised in a common message layer and multiple payment layer modules, Polkadot and Ethereum. The implementations live in seperate repositories.
 
 # API
-**Disclaimer: the API might change over time**
+**Disclaimer: the API might change over time. Be aware of breaking changes!**
 
 The purpose of the payment channel module is to interact with the on-chain application logic and keep track of its state. It MUST keep track of the currently open payment channel and it MUST store the data that is necessary to close a payment channel persistently. It MUST also implement an identification scheme that gives each payment channel a unique identifier.
 
