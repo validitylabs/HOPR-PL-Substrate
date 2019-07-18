@@ -192,18 +192,34 @@ The accounting scheme will consist of only one application logic that is current
    HOPR is modularised in a common message layer and multiple payment layer modules, Polkadot and Ethereum. The implementations live in seperate repositories.
 
 # BPM diagrams
-[<img height=400px src="img/HOPR-init.svg">]()
 
-[<img height=400px src="img/HOPR-message-relay.svg">]()
+## Initialisation
+Once a party decides to be part of the HOPR network, it will first create or recover an identity. It will then publish that identity and the corresponding key files to the network such that other participants are able to find that node.
 
-[<img height=400px src="img/HOPR-payout.svg">]()
+That node will then crawl the network to find other nodes in the HOPR network. It will then select a well-known subset of the received nodes and establish a payment channel with them. By doing that, it will broadcast the fact that there is a payment channel connection between these two nodes.
+[<img height=450px src="img/HOPR-init.svg">]()
+
+## Message relaying
+In order to send a message through the HOPR network, the node will first crawl the network to look for additional nodes. Afterwards, it will sample a route through the HOPR network and derive by using the keys of the intermediate nodes as well the one of the final receiver the cryptographic material to build up the packet. It will then ask the payment module to create an update transaction for the payment channel between itself and the first hop on the path.
+
+That hop will receive the packet and checks whether it is the designated recipient of that packet. If that is the case, it will display the message, otherwise it will check whether the cryptographic packet format is correct and whether the embedded is valid and whether there is a record in the blockchain of that particular payment channel. In case everything is alright, it will transform the packet such that the next downstream node is able to process it carefully.
+
+The node will also send an acknowledgement back to the previous node which allows that node to compute the keys that are necessary to initate a payout of the corresponding payment channel.
+[<img height=450px src="img/HOPR-message-relay.svg">]()
+
+## Payout
+Once a node wants to settle all payment channels in order payout all money that is in the HOPR network, it will at first use the payment module to create for each of the open payment channels a payout transaction. The payment module will use the received acknowledgements to compute the desired pre-image. Afterwards, the payment module will forward the transaction to the blockchain whose on-chain application logic checks whether the transmitted transaction is valid.
+
+In case everything is fine, the application logic will create an event that is observed by the participants of the payment channel. Each participant will then check whether it possesses a more recent transaction that is more profitable for that party. If that is the case, it will use the received acknowledgements and create an own payout transaction and publish that transaction to the network.
+
+The on-chain application will give the participants some timeframe that they can use to publish transaction that fit better for them. Once that time interval is due, the initiator of the payout will create a transaction that transfers the assets back to both parties.
+
+To prevent collusion attacks, the nodes need to close all payment channel before they are able to get their assets out of HOPR.
+[<img height=450px src="img/HOPR-payout.svg">]()
 
 
 # API
 **Disclaimer: the API might change over time. Be aware of breaking changes!**
-
-
-<img width="250" src="https://github.com/validitylabs/HOPR-PL-Substrate/blob/master/img/HOPR-init.svg?raw=true" alt="libp2p hex logo" />
 
 The purpose of the payment channel module is to interact with the on-chain application logic and keep track of its state. It MUST keep track of the currently open payment channel and it MUST store the data that is necessary to close a payment channel persistently. It MUST also implement an identification scheme that gives each payment channel a unique identifier.
 
