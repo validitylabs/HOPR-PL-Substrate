@@ -193,6 +193,7 @@ The accounting scheme will consist of only one application logic that is current
 
 # API
 **Disclaimer: the API might change over time. Be aware of breaking changes!**
+![](img/HOPR-init.svg)
 
 <img width="250" src="https://github.com/validitylabs/HOPR-PL-Substrate/blob/master/img/HOPR-init.svg?raw=true" alt="libp2p hex logo" />
 
