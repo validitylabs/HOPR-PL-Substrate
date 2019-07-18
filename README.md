@@ -194,7 +194,7 @@ The accounting scheme will consist of only one application logic that is current
 # API
 **Disclaimer: the API might change over time**
 
-The payment channel module keeps track of open payment channels and store the relevant information persistently.
+The purpose of the payment channel module is to interact with the on-chain application logic and keep track of its state. It MUST keep track of the currently open payment channel and it MUST store the data that is necessary to close a payment channel persistently. It MUST also implement an identification scheme that gives each payment channel a unique identifier.
 
 ## create(id: string, signingProvider: SigningProvider): Promise\<PaymentModule\>
 Initiates the payment layer module and restores the information of the payment channels that are open at the moment.
