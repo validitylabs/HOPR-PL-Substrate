@@ -194,7 +194,7 @@ The accounting scheme will consist of only one application logic that is current
 # API
 **Disclaimer: the API might change over time. Be aware of breaking changes!**
 
-<img width="250" src="https://github.com/validitylabs/hopr/blob/master/img/HOPR-init.svg?raw=true" alt="libp2p hex logo" />
+<img width="250" src="https://github.com/validitylabs/HOPR-PL-Substrate/blob/master/img/HOPR-init.svg?raw=true" alt="libp2p hex logo" />
 
 The purpose of the payment channel module is to interact with the on-chain application logic and keep track of its state. It MUST keep track of the currently open payment channel and it MUST store the data that is necessary to close a payment channel persistently. It MUST also implement an identification scheme that gives each payment channel a unique identifier.
 
