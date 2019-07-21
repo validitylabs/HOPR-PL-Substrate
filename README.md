@@ -1,36 +1,39 @@
 # HOPR-PL-Substrate
 
-A payment layer implementation of HOPR in Substrate.
+This document details a [HOPR](https://github.com/validitylabs/hopr) payment layer implementation in Substrate.
 
-# Objectives
+# Context
 
-We see the Web3 as an ecosystem of decentralised asset systems like Polkadot and Ethereum, decentralised storage solutions like Filecoin or NuCypher as well as decentralised computation providers like Golem or Enigma. In this new ecosystem, there will be multiple decentralised applications (dApps) which will interact with each other as well as with these systems.
+Web3 is a stack of technologies that enable truly decentralized applications (dApps) featuring increased privacy and resilience for the next wave of web applications. Early examples working towards dApps are decentralized organizations (DAOs, e.g. by [Aragon](https://aragon.org/)), media platforms such as [Joystream](https://www.joystream.org/) or global pension infrastructure like [Akropolis](https://akropolis.io). Currently we see technological pillars emerging for building true dApps that do not rely on central infrastructure anymore:
 
-In order to deliver messages that are sent by dApps, at the moment most of them make use of Whisper which was developed by Ethereum community and suffers from certain shortcomings like missing scalability and unclear delivery behavior.
+1. Asset transfer systems like those enabled by blockchains
+2. Storage solutions like [Filecoin](https://filecoin.io/) or [NuCypher](https://www.nucypher.com)
+3. Computation providers like [Golem](https://golem.network/) or [Enigma](https://enigma.co/)
+
+In this new ecosystem, multiple decentralised applications (dApps) interact with one another as well as with these core technologies. All pillars feature projects that focus on privacy within that domain. For example, we see on-chain privacy solutions such as [ZCash](https://z.cash/) or [AZTEC](https://www.aztecprotocol.com/) on Ethereum, privat data storage by re-encryption in NuCypher and privacy-preserving computation in Enigma. At the same time, the ecosystem is lacking a go-to solution for network-level privacy enabling communication between separate networks, applications and users. Some dApps make use of Whisper which is developed by the Ethereum community but which - similar to other broadcast schemes - suffers from scalability restrictions when used for point-to-point communication and unclear delivery behavior. We build HOPR as a metadata-privat communication foundation of the Web3.
 
 <table>
     <tbody>
         <tr>
-            <td colspan=2 align="middle" width=33%><b>Assets</b>
-            <br>Bitcoin, Ethereum, Polkadot, Cosmos</td>
-            <td colspan=2 align="middle" width=33%><b>Storage</b>
-            <br>Filecoin / IPFS</td>
-            <td colspan=2 align="middle" width=33%><b>Computation</b>
+            <td colspan=3 align="middle"><b>dApps</b></td>
+        </tr>
+        <tr>
+            <td align="middle" width=33%><b>Assets</b>
+            <br>Bitcoin, ZCash, tokens</td>
+            <td align="middle" width=33%><b>Storage</b>
+            <br>Filecoin / IPFS, NuCypher</td>
+            <td align="middle" width=33%><b>Computation</b>
             <br>Golem, Nucypher</td>
         </tr>
         <tr>
-            <td colspan=3 align="middle"><b>dApp #1</b></td>
-            <td colspan=3 align="middle"><b>dApp #2</b></td>
-        </tr>
-        <tr>
-            <td colspan=6 align="middle"><b>Messaging</b><br>HOPR</td>
+            <td colspan=3 align="middle"><b>Messaging</b><br>HOPR</td>
         </tr>
     </tbody>
 </table>
 
-We also see that messages exchanged by dApps will be of value and that its perception will reveal sensible information to potential attackers. For that reason, we are designing a messaging system that adds privacy on the network level and allows dApps to communicate with each other privately.
+HOPR fills the gap between p2p networks and dApps that exchange sensitive information. HOPR adds metadata privacy on top of an existing P2P layer that is used in form of [libp2p](https://libp2p.io) or [WebRTC](https://en.wikipedia.org/wiki/WebRTC) in decentralized architectures today. It is compatible with underlying network protocols such as [TCP/IP](https://en.wikipedia.org/wiki/Internet_protocol_suite) or [QUIC](https://webrtc.org). Depending on the application, one layer above HOPR could be an optional storage / sync lauer which then enables e.g. chat application with longer-term message caching.
 
-HOPR will fill the missing hole between p2p networks and dApps that exchange sensible information.
+Data packages produced by dApps may not just contain valuable data but may also reveal metadata that can be linked to real-world identities. On-chain privacy, for example, is of limited impact if a network observer can link metadata to a social media account in order to attack the person because of the fact *that* they used privacy-preserving financial networks - without knowing *what* exactly they used them for.
 
 <table>
     <thead>
@@ -52,18 +55,18 @@ HOPR will fill the missing hole between p2p networks and dApps that exchange sen
         </tr>
         <tr>
             <td><b>Privacy</b></td>
-            <td>Scalable, decentralised metadata protection. Incentivisations for packet relayers and short-term packet caching.</td>
+            <td>Scalable, decentralised metadata protection. Incentivisations for packet relayers and short-term packet caching</td>
             <td><b>HOPR</b></td>
         </tr>
         <tr>
             <td>P2P</td>
             <td>Overlay routing, NAT traversal</td>
-            <td><a href="https://libp2p.io">libp2p</a>, <a href="https://webrtc.org">WebRTC</a></td>
+            <td>libp2p, WebRTC</td>
         </td>
         <tr>
             <td>Network</td>
             <td>Underlay routing, congestion control</td>
-            <td><a href="https://en.wikipedia.org/wiki/Internet_protocol_suite">TCP / IP</a>, <a href="https://en.wikipedia.org/wiki/QUIC">QUIC</a></td>
+            <td>TCP / IP, QUIC</td>
         </tr>
     </tbody>
 </table>
