@@ -142,7 +142,9 @@ State changes are incrementally numbered such that an honest node is able to con
 
 ### Signature verification
 
-Every time a node sends a packet to the next downstream node, it creates an *update transaction* that alters the state of the payment channel. The transaction contains not only the amount that is transferrred but also an elliptic curve point. The signature is computed over the transaction data as well as the curve point, so once a node receives that transaction, it can verify whether the signature is correct without requiring any additional values. However, the on-chain application logic accepts that update transaction only if the sender of the transaction is able to present either a value that solves the discrete logarithm problem for that point or renounce a fraction of the received money.
+Every time a node sends a packet to the next downstream node, it creates an *update transaction* that locally alters the state of the payment channel. The transaction contains not only the amount that is transferrred but also an elliptic curve point. The purpose of the additional curve point is to decouple the settlement of a payment channel between two parties from the actions of other parties. In addition to the amount that is transferred to the next node, the signature of the update transaction covers also that curve point. 
+
+Once a node receives that transaction, it can, as none of the embedded values is blinded, verify whether the signature fits to the expected public key. However, the on-chain application logic will accept that update transaction only if that party is able to present either the cofactor that is required to derive the curve point from base point of that used curve or renounce a fraction of the received money. The discrete logarithm assumption guarantees at that point that the probability for the sender to derive that cofactor from curve point is negligible.
 
 The reason for this mechanism is that the payment channel between a node and the next downstream node relies on the acknowledgments that this node receives from those nodes to which it forwards the messages. More precisely, the settlement and therefore the payout depends on the behavior of third parties. As this contradicts the principle of a payment channel between exactly two parties, both nodes need to be able to settle their payment channel even when others do not acknowledge the reception of packet in time.
 
@@ -194,7 +196,12 @@ The Substrate-based HOPR chain uses a custom application logic implemented in Ru
 # Process details
 
 ## Initialisation
-Once a party decides to be part of the HOPR network, they create or recover an identity from a private key. It then publishes that identity and the corresponding key to the network such that other participants are able to find them. The node crawls the network to find other nodes in the HOPR network starting from a bootstrap node. The operator of the node selects some of the received nodes and establish a payment channel with them.
+Once a party decides to be part of the HOPR network, they create or recover an identity from a private key. It then publishes that identity and the corresponding key to the network such that other participants are able to find them. The node will then crawl the network. That crawling process serves two purposes. First, it helps the new node to discover other nodes in the network.
+The second argument comes from the fact that a global passive adversary might be able to observe which nodes are asked for other nodes and might be therefore able to determine which nodes might be known and which are unknown.
+
+The crawling is done iteratively by first asking the bootstrap nodes for additional nodes in the network. Then each node selects randomly a subset of the received nodes and asks them for other nodes. It will repeat the process a few times such that the number of known nodes is high enough to keep the uncertainty of the potential global adversary at a sufficiently high level.
+
+By doing this, the nodes will receive a partial view of the network that is then used to pick a path through the network. Note that the nodes won't get a full overview of the network.
 
 [<img height=450px src="img/HOPR-init.svg">](img/HOPR-init.svg)
 
@@ -206,6 +213,11 @@ That hop receives the packet and checks whether it is the designated recipient o
 The node also sends an acknowledgement back to the previous node which allows that node to compute the keys that are necessary to initate a payout of the corresponding payment channel.
 
 [<img height=450px src="img/HOPR-message-relay.svg">](img/HOPR-message-relay.svg)
+
+## Payment channels
+Each node need to keep track of its open payment channels to other nodes. Note that the assets are bound to the signatures of both participants once the payment channel has been opened. This means that in case one of the participants refuses any communication with the counterparty, the assets might get locked forever. Both of them therefore agree on a closing transaction that restores the previous asset distribution. That transaction will have index *0* such that it can be published to the network in case something goes wrong. It loses its validity once both of them agree upon a subsequent transaction which will have a higher index, e. g. *1* and one of them publishes the more recent transaction to the network.
+
+For that reason, it is the responsability of the nodes, to store the most recent update transaction as well as the restore transaction as long as the payment channel remains open. Agressive nodes might also store the most profitable transaction and try to publish that transaction instead of the most recent transaction. Both of them will publish in a ping-pong alike manner more recent transactions until they reach either the most recent transaction or a transaction with which both of them want to live.
 
 ## Payout
 Once a node wants to settle all payment channels in order payout all money that is in the HOPR network, it creates a payout transaction for each of their open payment channels using the payment module. The payment module consumes the received acknowledgements to compute the desired pre-image. Afterwards, the payment module forwards the transaction to the blockchain which checks via on-chain application logic if the transmitted transaction is valid.
@@ -222,12 +234,22 @@ To prevent collusion attacks, the nodes need to close all payment channel before
 # API
 **Disclaimer: the API might change over time. Be aware of breaking changes!**
 
-The purpose of the payment channel module is to interact with the on-chain application logic and keep track of its state. It MUST keep track of the currently open payment channels and it MUST store the data that is necessary to close a payment channel persistently. It MUST also implement an identification scheme that gives each payment channel a unique identifier.
+The purpose of the payment channel module is to interact with the on-chain application logic and keep track of its state. It MUST keep track of the currently open payment channels and it MUST store the data that is necessary to close a payment channel persistently. It MUST also implement an identification scheme that gives each payment channel a unique identifier. This can be done by considering the addresses of both participants as integers and concatenating the lower address to the higher address. The identifier might be the hash of the concatenated addresses.
 
 ## create(id: string, signingProvider: SigningProvider): Promise\<PaymentModule\>
 Initiates the payment layer module and restores the information of the payment channels that are open at the moment.
 - `id` the HOPR id of the node. The information is used to derive the `channelId`
 - `signingProvider.sign(msg: string)` 
+
+## send(to: Address, payload: Buffer | string, strategyProvider?: StrategyProvider): Promise
+Takes the address of the receiver and the desired payload and encodes that information in a proper HOPR packet. It will automatically pick a route through the HOPR network and send the packet to the first hop. It will also alter the payment channel to the first hop and transfer the relay fees to the hops on the route. It MUST return a promise that resolves once the first relay in the route acknowledges the forwarding of the packet.
+- `to` the HOPR address of the receiver
+- `msg` the payload
+- `strategyProvider.getRoute(from: Address, to: Address): Address[]` optional. Use a customised route-picking strategy. 
+
+## receive((payload: Buffer | string) => _)
+Propagates the reception of a packet to the application layer.
+- `(payload: Buffer | string) => _` will be called with the payload that was extracted from the received packet. HOPR will ignore the output of that function for the moment, in case there is any.
 
 ## getChannelId(from?: Address, to: Address): string
 Computes the identifier for the channel between `from` and `to`. The identifier SHOULD be chosen in a way such that `to` and `from` commute. If no `from` is given, it MUST take the own address.
@@ -247,9 +269,13 @@ Creates a transaction of `amount` assets to the account of `to`. The signature o
 - `to` the HOPR address of the counterparty
 - `amount` amount of assets that are transferred to `to`. The value MUST NOT be given as a Number due to the precision limitations of programming languages.
 
-## checkTransaction(tx: Transaction): boolean
-Check whether a given transaction is valid. It MUST check the signature and it MUST check whether the amount is satisfactory.
+## checkTransaction(tx: Transaction, P: CurvePoint): Promise\<boolean\>
+Check whether a given transaction is valid. It MUST check the signature and it MUST check whether the amount is satisfactory and that there is an open payment channel. Remark: this method will only the blockchain-related properties, everything else, like the secret sharing, is checked by the message layer.
 - `tx` the transaction to check
+
+## storeTransaction(tx: Transaction): Promise
+The method is called by the message layer after the message layer has considered the embedded secret sharing valid and `checkTransaction()` returned `true`. The method SHOULD store the transaction persistently.
+- `tx` the transaction to store
 
 ## getEmbeddedMoney(tx: Transaction): BigInt
 Returns the amount of assets that are embedded in the given transaction.
