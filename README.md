@@ -120,9 +120,9 @@ More precisely, in order to initiate and become part of the network, a HOPR node
 
 Once in a while, nodes merge their local state with the global state. Therefore, they publish their accumulated state changes and ask the blockchain network to verify that state change. The verifiers in the network learn whether the local state changes of that particular node have led to valid state.
 
-HOPR makes use of special behavior of distributed ledger systems that they can force senders of transactions to reveal pre-images of one-way functions like hash functions or elliptic curve operations into a transaction even if only the result of the respective one-way function is necessary to verify the embedded signature.
+HOPR makes use of special behavior of programmablev distributed ledger systems that they can force senders of transactions to reveal pre-images of one-way functions like hash functions or elliptic curve operations into a transaction even if only the result of the respective one-way function is necessary to verify the embedded signature.
 
-In order to keep the on-chain transaction costs for opening and closing payment channels low, HOPR relies on Substrate chain that is highly optimized to the specific purpose as opposed to general-purpose and more expensive smart contract platforms like Ethereum. In addition, upon launch of Polkadot, HOPR benefits from interoperability gains with other applications and infrastructure in the ecosystem.
+In order to keep the on-chain transaction costs for opening and closing payment channels low, HOPR relies on a Substrate-based chain that is highly optimized to the specific purpose as opposed to general-purpose and more expensive smart contract platforms like Ethereum. In addition, upon launch of Polkadot, HOPR benefits from interoperability gains with other applications and infrastructure in the ecosystem.
 
 ## Techniques
 
@@ -196,7 +196,7 @@ The Substrate-based HOPR chain uses a custom application logic implemented in Ru
 ## Initialisation
 Once a party decides to be part of the HOPR network, they create or recover an identity from a private key. It then publishes that identity and the corresponding key to the network such that other participants are able to find them. The node crawls the network to find other nodes in the HOPR network starting from a bootstrap node. The operator of the node selects some of the received nodes and establish a payment channel with them.
 
-[<img height=450px src="img/HOPR-init.svg">]()
+[<img height=450px src="img/HOPR-init.svg">](img/HOPR-init.svg)
 
 ## Message relaying
 In order to send a message through the HOPR network, the node crawl the network to look for additional nodes. Afterwards, they establish a route through the HOPR network and derive the cryptographic material to build up the packet by using the keys of the intermediate nodes as well the key of the final receiver. The sender then instructs the payment module to create an update transaction for the payment channel between itself and the first hop on the path.
