@@ -205,7 +205,7 @@ That hop receives the packet and checks whether it is the designated recipient o
 
 The node also sends an acknowledgement back to the previous node which allows that node to compute the keys that are necessary to initate a payout of the corresponding payment channel.
 
-[<img height=450px src="img/HOPR-message-relay.svg">]()
+[<img height=450px src="img/HOPR-message-relay.svg">](img/HOPR-message-relay.svg)
 
 ## Payout
 Once a node wants to settle all payment channels in order payout all money that is in the HOPR network, it creates a payout transaction for each of their open payment channels using the payment module. The payment module consumes the received acknowledgements to compute the desired pre-image. Afterwards, the payment module forwards the transaction to the blockchain which checks via on-chain application logic if the transmitted transaction is valid.
@@ -216,7 +216,7 @@ The on-chain application gives the participants some timeframe during which they
 
 To prevent collusion attacks, the nodes need to close all payment channel before they are able to get their assets out of HOPR.
 
-[<img height=450px src="img/HOPR-payout.svg">]()
+[<img height=450px src="img/HOPR-payout.svg">](img/HOPR-payout.svg)
 
 
 # API
