@@ -128,23 +128,49 @@ In order to keep the on-chain transaction costs for opening and closing payment 
 
 Each hop possesses a key pair which is also used as an address of that node. Once a hop receives a packet, it multiplies the embedded curve point with its own private key and derives the Intermediate Keying Material (IKM). The nodes use that keying material to derive multiple keys that are necessary to process the packet.
 
+## Elliptic-curve cryptography
+
+HOPR makes use of elliptic-curve cryptography whenever asymmetric key operations are necessary. Elliptic-curve cryptography (ECC) comes with the advantage of very short public keys in comparison to asymmetric cryptography over natural numbers. ECC also comes with the counterintuitive property that addition and multiplication are easy to compute whilst when given the points `P, G` finding a cofactor `a` such that `a * G = P` is most likely infeasible with current computers. The "division" problems therefore translates into the *discrete logarithm problem* on natural numbers.
+
 ### Secret-sharing
 
-The IKM is used to derive a key share *s_a* per incoming packet and another key share *s_b* per outgoing packet. Outgoing key share *s_b* and incoming key share *s_a* of the next downstream node yield a key that is used as the pre-image of the key that is necessary to redeem the money.
+The sender of the packet uses the public keys to derive a secret sharing between every two adjacent nodes on the selected path. For simplicity, suppose that there are only three nodes involved: one sender, one relayer and one receiver.
 
-### Payment channel update transactions
+As the sender knows the whole path, they know the IKMs of the relayer and the receiver. Each node is able to derive two different keys, *s_a* and *s_b*, for the secret sharing: *s_a* is derived when relaying a packet, *s_b* is used when generating an acknowledgement.
 
-HOPR uses payment channels between adjacent nodes in the network and routes payments along these edges. During the initialisation phase, each node crawls the network in order to find others who are also willing to speak the HOPR protocol. They then select from the set of received nodes a subset of nodes with whom they establish a payment channel.
+Once the sender receives the packet, they compute the secret *s* as `s_a + s_b = s` where `+` denotes addition over a finite field. When acting as a relayer, they receive *S* as well as *S_b = s_b \* G* from the sender and check that
+
+`s_a * G + S_b = s_a * G + s_b * G = (s_a + s_b) * G = S`
+
+The multiplication with the base point `G` of the curve is hereby used as a one-way function. When closing a payment channel, the on-chain application logic requires from the transaction sender to present `s = s_a + s_b` instead of *S*. 
+
+### Payment channels
+
+HOPR uses payment channels between adjacent nodes in the network and routes payments along these edges. 
+
+During the initialisation phase, each node crawls the network in order to find others who are also willing to speak the HOPR protocol. They then select from the set of received nodes a subset of nodes with whom they intend to establish a payment channel.
 
 Initialising a payment channel means that two participants agree on a certain amount of assets from each of them and lock these assets until both of them agree on how to distribute them. In case they do not find a consensus, they always have the chance to restore the original or latest stored status that is signed off from both sides. Once they agree on a new distribution, they both sign a message that encodes the new state and store this transaction until either one of them initiates a payout or they agree on another distribution.
 
 State changes are incrementally numbered such that an honest node is able to convince the distributed ledger of the rightful most recent state of the payment channel. In order to give nodes that opportunity, each node listens to the payment channel closing event and is allowed to present a more recent transaction within a defined amount of time.
 
-### Signature verification
+### Updating the balance in a payment channel
 
-Every time a node sends a packet to the next downstream node, it creates an *update transaction* that locally alters the state of the payment channel. The transaction contains not only the amount that is transferrred but also an elliptic curve point. The purpose of the additional curve point is to decouple the settlement of a payment channel between two parties from the actions of other parties. In addition to the amount that is transferred to the next node, the signature of the update transaction covers also that curve point. 
+Every time a node considers an incoming packet valid, they peal off one layer of encryption and locally update the distribution of the payment channel with the next downstream.
 
-Once a node receives that transaction, it can, as none of the embedded values is blinded, verify whether the signature fits to the expected public key. However, the on-chain application logic will accept that update transaction only if that party is able to present either the cofactor that is required to derive the curve point from base point of that used curve or renounce a fraction of the received money. The discrete logarithm assumption guarantees at that point that the probability for the sender to derive that cofactor from curve point is negligible.
+Therefore, they extract the secret *S^(n + 1, n + 2)* which denotes the shared secret between the next and the next but one node from the path. Note that it is the responsibility of the sender of the packet to include that secret in the packet header and that an invalid *S^(n + 1, n + 2)* will cause a packet loss since the next downstream node will drop the packet. The node then subtracts the relay fee from the received funds and updates the local state of the payment channel with the next downstream node.
+
+More precisely, they increment the current index of the payment channel to *index + 1*. They further subtract the relay fee from the received transaction and add the remainder to the balance of the next downstream. Note that this requires an honest behavior of that node. See section [#TODO]() how the nodes are incentivised to do that. They also extract *S^(n + 1, n + 2)_i* from the packet and add it to the sum *~S* of the previous secrets *S^(n + 1, n + 2)_i*. The signature is computed as 
+
+`Sig = Sign_A(nonce, index + 1, balance_A - remainder, balance_B, ~S + S^(n + 1, n + 2))`
+
+where *Sign_A* denotes the algorithm that creates a signature with the private key of party A, *nonce* is chosen randomly and only used once, *balance_A* is the current balance of party and *balance_B* is the current balance of party B.
+
+## Verification of the update transaction - [TODO]
+
+The transaction contains not only the amount that is transferrred but also an elliptic curve point. The purpose of the additional curve point is to decouple the settlement of a payment channel between two parties from the actions of other parties. In addition to the amount that is transferred to the next node, the signature of the update transaction covers also that curve point. 
+
+Once a node receives that transaction, it can, as none of the embedded values is blinded, verify whether the signature fits to the expected public key. However, the on-chain application logic will accept that update transaction only if that party is able to present either the cofactor that is required to derive the curve point from base point of that used curve or renounce a fraction of the received funds. The discrete logarithm assumption guarantees at that point that the probability for the sender to derive that cofactor from curve point is negligible.
 
 The reason for this mechanism is that the payment channel between a node and the next downstream node relies on the acknowledgments that this node receives from those nodes to which it forwards the messages. More precisely, the settlement and therefore the payout depends on the behavior of third parties. As this contradicts the principle of a payment channel between exactly two parties, both nodes need to be able to settle their payment channel even when others do not acknowledge the reception of packet in time.
 
@@ -220,7 +246,7 @@ Each node need to keep track of its open payment channels to other nodes. Note t
 For that reason, it is the responsability of the nodes, to store the most recent update transaction as well as the restore transaction as long as the payment channel remains open. Agressive nodes might also store the most profitable transaction and try to publish that transaction instead of the most recent transaction. Both of them will publish in a ping-pong alike manner more recent transactions until they reach either the most recent transaction or a transaction with which both of them want to live.
 
 ## Payout
-Once a node wants to settle all payment channels in order payout all money that is in the HOPR network, it creates a payout transaction for each of their open payment channels using the payment module. The payment module consumes the received acknowledgements to compute the desired pre-image. Afterwards, the payment module forwards the transaction to the blockchain which checks via on-chain application logic if the transmitted transaction is valid.
+Once a node wants to settle all payment channels in order payout all funds that are in the HOPR network, it creates a payout transaction for each of their open payment channels using the payment module. The payment module consumes the received acknowledgements to compute the desired pre-image. Afterwards, the payment module forwards the transaction to the blockchain which checks via on-chain application logic if the transmitted transaction is valid.
 
 In case everything is fine, the application logic emits an event that is observed by the participants of the payment channel. Each participant then checks whether it possesses a more recent transaction that is more profitable for them. If that is the case, it uses the received acknowledgements and creates its own payout transaction and publishes that transaction to the network.
 
@@ -270,20 +296,20 @@ Creates a transaction of `amount` assets to the account of `to`. The signature o
 - `amount` amount of assets that are transferred to `to`. The value MUST NOT be given as a Number due to the precision limitations of programming languages.
 
 ## checkTransaction(tx: Transaction, P: CurvePoint): Promise\<boolean\>
-Check whether a given transaction is valid. It MUST check the signature and it MUST check whether the amount is satisfactory and that there is an open payment channel. Remark: this method will only the blockchain-related properties, everything else, like the secret sharing, is checked by the message layer.
+Check whether a given transaction is valid. It MUST check the signature and it MUST check whether the amount is satisfactory and that there is an open payment channel. Remark: this method will only check the blockchain-related properties, everything else, like the secret sharing, is checked by the message layer.
 - `tx` the transaction to check
 
 ## storeTransaction(tx: Transaction): Promise
 The method is called by the message layer after the message layer has considered the embedded secret sharing valid and `checkTransaction()` returned `true`. The method SHOULD store the transaction persistently.
 - `tx` the transaction to store
 
-## getEmbeddedMoney(tx: Transaction): BigInt
+## getEmbeddedFunds(tx: Transaction): BigInt
 Returns the amount of assets that are embedded in the given transaction.
 - `tx` the transaction to extract the transferred amount from
 
 ## initiatePayout(): Promise\<BigInt\>
 Initiates a payout of all payment channels. It MUST close all payment channels and resolve just when all payment channels are either closed or considered abandonned. It SHOULD return the amount of assets that has been received by the HOPR node.
 
-## stakeMoney(amount: BigInt): Promise\<Receipt\>
-Locks money in the application logic such that it is later available to open payment channels.
+## stakeFunds(amount: BigInt): Promise\<Receipt\>
+Locks funds in the application logic such that it is later available to open payment channels.
 - `amount` the amount of assets to deposit in the on-chain application logic.
