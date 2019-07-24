@@ -124,21 +124,29 @@ HOPR makes use of special behavior of programmablev distributed ledger systems t
 
 In order to keep the on-chain transaction costs for opening and closing payment channels low, HOPR relies on a Substrate-based chain that is highly optimized to the specific purpose as opposed to general-purpose and more expensive smart contract platforms like Ethereum. In addition, upon launch of Polkadot, HOPR benefits from interoperability gains with other applications and infrastructure in the ecosystem.
 
+## What HOPR incentivizes
+
+The goal of the payment layer is to incentivise operations on the message layer. In order to do that, we specify those actions we want to pay nodes for:
+- **correct transformation** of packets such that the next downstream nodes is able to perform their transformations on the received packets
+- **delivery of the packet** to the next node and caching the packet for a small amount of time, e. g. 2 hours, until the next downstream node is able to receive the packet.
+
+The only party who can prove this is the next downstream node by acknowledging the reception and the validity of the packet. For that reason, the sender prepares several secrets that are derivable by the nodes along the path while creating the whole packet. These secrets are then used to create a two-out-of-two secret sharing between every two adjacent nodes along the path. The sender then applies a one-way function on the second key share and embeds that value in the part of the packet that is visible to the first node. This allows the first node to check whether the derived value and the value which it is going to receive from the next downstream node are sufficient to reconstruct the secret that is embedded in the secret sharing. It also allows the first node to challenge the second node for sending back the desired secret share. In case the second node answers with an invalid acknowledgement, it gives the first node an evidence to prove towards the distributed ledger that the acknowledgement was invalid.
+
 ## Techniques
 
 Each hop possesses a key pair which is also used as an address of that node. Once a hop receives a packet, it multiplies the embedded curve point with its own private key and derives the Intermediate Keying Material (IKM). The nodes use that keying material to derive multiple keys that are necessary to process the packet.
 
 ## Elliptic-curve cryptography
 
-HOPR makes use of elliptic-curve cryptography whenever asymmetric key operations are necessary. Elliptic-curve cryptography (ECC) comes with the advantage of very short public keys in comparison to asymmetric cryptography over natural numbers. ECC also comes with the counterintuitive property that addition and multiplication are easy to compute whilst when given the points `P, G` finding a cofactor `a` such that `a * G = P` is most likely infeasible with current computers. The "division" problems therefore translates into the *discrete logarithm problem* on natural numbers.
+HOPR makes use of elliptic-curve cryptography whenever asymmetric key operations are necessary. Elliptic-curve cryptography (ECC) comes with the advantage of very short public keys in comparison to previously used asymmetric cryptography over natural numbers. ECC also comes with the counterintuitive property that addition and multiplication are easy to compute whilst when given the points `P, G` finding a cofactor `a` such that `a * G = P` is most likely infeasible with current computers. The "division" problem therefore translates into the *discrete logarithm problem* on natural numbers.
 
 ### Secret-sharing
 
-The sender of the packet uses the public keys to derive a secret sharing between every two adjacent nodes on the selected path. For simplicity, suppose that there are only three nodes involved: one sender, one relayer and one receiver.
+The sender of the packet uses the public keys to derive a secret sharing between every two adjacent nodes on the selected path. For simplicity, assume for the moment that there are only three nodes involved: one sender, one relayer and one receiver.
 
 As the sender knows the whole path, they know the IKMs of the relayer and the receiver. Each node is able to derive two different keys, *s_a* and *s_b*, for the secret sharing: *s_a* is derived when relaying a packet, *s_b* is used when generating an acknowledgement.
 
-Once the sender receives the packet, they compute the secret *s* as `s_a + s_b = s` where `+` denotes addition over a finite field. When acting as a relayer, they receive *S* as well as *S_b = s_b \* G* from the sender and check that
+Once the sender receives the packet, they compute the secret *s* as `s_a + s_b = s` where `+` denotes addition over a finite field of the elliptic curve. When acting as a relayer, they receive *S* as well as *S_b = s_b \* G* from the sender and check that
 
 `s_a * G + S_b = s_a * G + s_b * G = (s_a + s_b) * G = S`
 
@@ -156,31 +164,35 @@ State changes are incrementally numbered such that an honest node is able to con
 
 ### Updating the balance in a payment channel
 
-Every time a node considers an incoming packet valid, they peal off one layer of encryption and locally update the distribution of the payment channel with the next downstream.
+Every time a node considers an incoming packet valid, they peal off one layer of encryption and locally update the distribution of the funds in the payment channel with the next downstream.
 
 Therefore, they extract the secret *S^(n + 1, n + 2)* which denotes the shared secret between the next and the next but one node from the path. Note that it is the responsibility of the sender of the packet to include that secret in the packet header and that an invalid *S^(n + 1, n + 2)* will cause a packet loss since the next downstream node will drop the packet. The node then subtracts the relay fee from the received funds and updates the local state of the payment channel with the next downstream node.
 
-More precisely, they increment the current index of the payment channel to *index + 1*. They further subtract the relay fee from the received transaction and add the remainder to the balance of the next downstream. Note that this requires an honest behavior of that node. See section [#TODO]() how the nodes are incentivised to do that. They also extract *S^(n + 1, n + 2)_i* from the packet and add it to the sum *~S* of the previous secrets *S^(n + 1, n + 2)_i*. The signature is computed as 
+More precisely, they increment the current index of the payment channel to *index + 1*. They further subtract the relay fee from the received transaction and add the remainder to the balance of the next downstream. Note that this requires an honest behavior of that node. See section [Fairness mechanisms](#fairness-mechanisms) how they are incentivised to behave like that. They also extract *S^(n + 1, n + 2)_i* from the packet and add it to the sum *~S* of the previous secrets *S^(n + 1, n + 2)_i*. The signature is then computed as
 
 `Sig = Sign_A(nonce, index + 1, balance_A - remainder, balance_B, ~S + S^(n + 1, n + 2))`
 
-where *Sign_A* denotes the algorithm that creates a signature with the private key of party A, *nonce* is chosen randomly and only used once, *balance_A* is the current balance of party and *balance_B* is the current balance of party B.
+where *Sign_A* denotes the algorithm that creates a signature with the private key of party A, *nonce* is chosen uniformly at random and only used once, *balance_A* is the current balance of party A and *balance_B* is the current balance of party B.
 
-## Verification of the update transaction - [TODO]
+### Verification of the update transaction
 
-The transaction contains not only the amount that is transferrred but also an elliptic curve point. The purpose of the additional curve point is to decouple the settlement of a payment channel between two parties from the actions of other parties. In addition to the amount that is transferred to the next node, the signature of the update transaction covers also that curve point. 
-
-Once a node receives that transaction, it can, as none of the embedded values is blinded, verify whether the signature fits to the expected public key. However, the on-chain application logic will accept that update transaction only if that party is able to present either the cofactor that is required to derive the curve point from base point of that used curve or renounce a fraction of the received funds. The discrete logarithm assumption guarantees at that point that the probability for the sender to derive that cofactor from curve point is negligible.
+Once a node receives a transaction, they can, as none of the embedded values is blinded, verify whether the signature fits to the expected public key. However, the on-chain application logic will accept that update transaction only if that party is able to present either the cofactor that is required to derive the curve point from base point of that used curve or renounce a fraction of the received funds. The discrete logarithm assumption guarantees at that point that the probability for the sender to derive that cofactor from curve point is negligible.
 
 The reason for this mechanism is that the payment channel between a node and the next downstream node relies on the acknowledgments that this node receives from those nodes to which it forwards the messages. More precisely, the settlement and therefore the payout depends on the behavior of third parties. As this contradicts the principle of a payment channel between exactly two parties, both nodes need to be able to settle their payment channel even when others do not acknowledge the reception of packet in time.
 
-## What HOPR incentivizes
+Assume now that there is a set *J* that contains the indices of all packet that haven't been acknowledged and the relayer only knows the corresponding values *S_i*. Let furter *I* be the set of all packet that have been acknowledged and the relayer knows the corresponding values *s_i*. Note that
 
-The goal of the payment layer is to incentivise operations on the message layer. In order to do that, we specify those actions we want to pay nodes for:
-- **correct transformation** of packets such that the next downstream nodes is able to perform their transformations on the received packets
-- **delivery of the packet** to the next node and caching the packet for a small amount of time, e. g. 2 hours, until the next downstream node is able to receive the packet.
+`sum(...s_i) * G + product(...S_j) = sum(...s_i) * G + sum(...s_j) * G = (sum(...s_i) + sum(...s_j)) * G = S`
 
-The only party who can prove this is the next downstream node by acknowledging the reception and the validity of the packet. For that reason, the sender prepares several secrets that are derivable by the nodes along the path while creating the whole packet. These secrets are then used to create a two-out-of-two secret sharing between every two adjacent nodes along the path. The sender then applies a one-way function on the second key share and embeds that value in the part of the packet that is visible to the first node. This allows the first node to check whether the derived value and the value which it is going to receive from the next downstream node are sufficient to reconstruct the secret that is embedded in the secret sharing. It also allows the first node to challenge the second node for sending back the desired secret share. In case the second node answers with an invalid acknowledgement, it gives the first node an evidence to prove towards the distributed ledger that the acknowledgement was invalid.
+In order to close a payment channel without having all acknowledgements, they pass `sum(...s_i)` and `product(...S_j)` as well as the most recent signed state change of the payment channel to the on-chain application logic which will then check if `sum(...s_i) * G + product(...S_j) = S`. This is possible because all signed state changes are computed over the most recent sum *S* and *S* is therefore known by the smart contract.
+
+### Fairness mechanisms
+
+As written in section [Updating the balance in a payment channel](#updating-the-balance-in-a-payment-channel), HOPR disincentivises nodes to decrease the forwarded relay fees. Note that they might increase the forwarded funds but as nodes in the HOPR network are assumed to behave rationally it is very unlikely that they do that.
+
+Assume now that a relayer decreases the forwarded funds to the next node. More precisely, the reward of the relayer is now higher than intended whilst the reward of next downstream nodes is lower than expected. The reason why the attack of the relayer won't be succesful is that they need the acknowledgement of the next downstream node to redeem the funds - which won't send the required acknowledgement unless they receive the expected amount of funds.
+
+In order to determine how many funds are destined to be paid to that node, they need to be able to find out at which position of the path they are. It is therefore the responsibility of the sender of the packet to specify how much money they intend to spend for each hop and embed this information in the part of the packet that is visible to the respective node. More precisely, the sender specifies how many funds in total each node receives from the previous node. As the nodes along the path will drop the package once they consider the relay fees to low, the sender is incentivised to embed enough funds in the packet to make sure that the packet receives its desired destination.
 
 # Details of the Polkadot integration
 HOPR uses Substrate to implement the Polkadot integration. The application logic is similar to the one that [we have built for the Ethereum Virtual Machine (EVM)](https://github.com/validitylabs/hopr).
