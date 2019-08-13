@@ -180,22 +180,35 @@ Each hop possesses a key pair which is also used as an address of that node. Onc
 
 HOPR makes use of elliptic-curve cryptography whenever asymmetric key operations are necessary. Elliptic-curve cryptography (ECC) comes with the advantage of very short public keys in comparison to previously used asymmetric cryptography over natural numbers. ECC also comes with the counterintuitive property that addition and multiplication are easy to compute whilst when given the points `P, G` finding a cofactor `a` such that `a * G = P` is most likely infeasible with current computers. The "division" problem therefore translates into the *discrete logarithm problem* on natural numbers.
 
-### Secret sharing
-A relay node (Bob) receives an update transaction of their payment channel with the previous relay node (Alice, which might actually be the sender) as part of the package header. It then needs the collaboration of the next downstream relayer (Charlie, which might actually be the recipient) to prevent a trivial take-the-money-and-run attack. This is implemented as a secret sharing mechanism: Bob gets the package from Alice and can then calculate `s_a`. After Charlie was passing him the second key-half `s_b`, Bob can compute the secret `s = s_a + s_b` where `+` denotes addition over a finite field of the elliptic curve. After Bob relayed `N` transactions from Alice and also get all the key-halves from the next downstream node they can thus submit the sum of all secrets
+### Secret Sharing
 
-<img src="https://latex.codecogs.com/png.latex?s_{total} = \sum_{i=0}^{N} s_{i,a} + s_{i,b} = \sum_{i=0}^{N} s_i " /> 
+A relay node (Bob) receives an update transaction of their payment channel with the previous relay node (Alice, which might actually be the sender) as part of the package header. It then needs the collaboration of the next downstream relayer (Charlie, which might actually be the recipient) to prevent a trivial take-the-money-and-run attack. This is implemented as a secret sharing mechanism: Bob gets the package from Alice and can then calculate `s_a` with his private key that corresponds to the public key which the sender used to encrypt the value. After Charlie passes the second key-half `s_b` to Bob, Bob can compute the secret `s = s_a + s_b` where `+` denotes addition over a finite field of the elliptic curve. After Bob relayed `N` transactions from Alice and also got all the key-halves from the next downstream node, he can thus submit the sum of all secrets `s_{total} = \sum_{i=0}^{N} s_{i,a} + s_{i,b} = \sum_{i=0}^{N} s_i` to release his payments.
 
+In order to prevent Bob from faking `s_{total}` and thereby extracting a larger amount from a payment channel than he should, a signature is required from Alice. Therefore, every update transaction from Alice contains a signature over `S_{total} = s_{total} * G`. The multiplication with the base point `G` of the curve is hereby used as a one-way function. Now the smart contract:
 
+1. ensures validity of the signature of Alice over `S_{total}`
+2. ensures validity of the pre-image `S_{total} = s_{total} * G`
+3. facilitates the payout for the successfully delivered packages.
 
-The sender of the packet uses the public keys to derive a secret sharing between every two adjacent nodes on the selected path. For simplicity, assume for the moment that there are only three nodes involved: one sender, one relayer and one receiver.
+In reality, not all packages are going to be successfully delivered. As a consequence, Bob will be missing some `s_b` from the packages that got lost or for which the downstream relay node was not responsive. In turn, Bob will not be able to submit a correct `s_{total}` matching the corresponding `S_{total}` for which he has a valid signature from Alice.
 
-As the sender knows the whole path, they know the IKMs of the relayer and the receiver. Each node is able to derive two different keys, *s_a* and *s_b*, for the secret sharing: *s_a* is derived when relaying a packet, *s_b* is used when generating an acknowledgement.
+For settlement of payment channels for which not all packages have been successfully delivered, a partial settlement needs to be available. Assume that for a total of `N` packages, the first `X` were succesfully delivered and the last `Y` failed so that `N = X + Y` (ordering of successfull and unsuccessful messages is irrelevant and only serves as a simple example). In analogy to the above we then have 
 
-Once the sender receives the packet, they compute the secret *s* as `s_a + s_b = s` where `+` denotes addition over a finite field of the elliptic curve. When acting as a relayer, they receive *S* as well as *S_b = s_b \* G* from the sender and check that
+`s_{success} = \sum_{i=0}^{Y} s_{i,a} + s_{i,b} = \sum_{i=0}^{Y} s_i`,
 
-`s_a * G + S_b = s_a * G + s_b * G = (s_a + s_b) * G = S`
+`s_{fail} = \sum_{i=Y}^{Y+X} s_{i,a} + s_{i,b} = \sum_{i=Y}^{Y+X} s_i`,
 
-The multiplication with the base point `G` of the curve is hereby used as a one-way function. When closing a payment channel, the on-chain application logic requires from the transaction sender to present `s = s_a + s_b` instead of *S*. 
+`S_{success} = s_{success} * G`,
+
+`S_{fail} = s_{fail} * G`
+
+Bob can calculate `s_{success}` in order to get the corresponding payout for each of those `X` successfully delivered packages. He then needs to submit the remainder `S_{fail}` for which he will not receive a payout such that Alices' signature can be validated.
+
+Then the smart contract:
+
+1. ensures validity of the signature of Alice over `S_{total}`
+2. ensures validity of the pre-image `S_{total} = s_{success} * G + S_{fail}`
+3. facilitates a payout for successfully delivered packages corresponding to `s_{success}`
 
 ### Payment channels
 
