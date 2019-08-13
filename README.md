@@ -180,7 +180,12 @@ Each hop possesses a key pair which is also used as an address of that node. Onc
 
 HOPR makes use of elliptic-curve cryptography whenever asymmetric key operations are necessary. Elliptic-curve cryptography (ECC) comes with the advantage of very short public keys in comparison to previously used asymmetric cryptography over natural numbers. ECC also comes with the counterintuitive property that addition and multiplication are easy to compute whilst when given the points `P, G` finding a cofactor `a` such that `a * G = P` is most likely infeasible with current computers. The "division" problem therefore translates into the *discrete logarithm problem* on natural numbers.
 
-### Secret-sharing
+### Secret sharing
+A relay node (Bob) receives an update transaction of their payment channel with the previous relay node (Alice, which might actually be the sender) as part of the package header. It then needs the collaboration of the next downstream relayer (Charlie, which might actually be the recipient) to prevent a trivial take-the-money-and-run attack. This is implemented as a secret sharing mechanism: Bob gets the package from Alice and can then calculate `s_a`. After Charlie was passing him the second key-half `s_b`, Bob can compute the secret `s = s_a + s_b` where `+` denotes addition over a finite field of the elliptic curve. After Bob relayed `N` transactions from Alice and also get all the key-halves from the next downstream node they can thus submit the sum of all secrets
+
+<img src="https://latex.codecogs.com/png.latex?s_{total} = \sum_{i=0}^{N} s_{i,a} + s_{i,b} = \sum_{i=0}^{N} s_i " /> 
+
+
 
 The sender of the packet uses the public keys to derive a secret sharing between every two adjacent nodes on the selected path. For simplicity, assume for the moment that there are only three nodes involved: one sender, one relayer and one receiver.
 
