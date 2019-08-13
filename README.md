@@ -23,7 +23,7 @@ In this new ecosystem, multiple decentralised applications (dApps) interact with
             <td align="middle" width=33%><b>Storage</b>
             <br>Filecoin / IPFS, NuCypher</td>
             <td align="middle" width=33%><b>Computation</b>
-            <br>Golem, Nucypher</td>
+            <br>Golem, Enigma</td>
         </tr>
         <tr>
             <td colspan=3 align="middle"><b>Messaging</b><br>HOPR</td>
@@ -32,8 +32,6 @@ In this new ecosystem, multiple decentralised applications (dApps) interact with
 </table>
 
 HOPR fills the gap between p2p networks and dApps that exchange sensitive information. HOPR adds metadata privacy on top of an existing P2P layer that is used in form of [libp2p](https://libp2p.io) or [WebRTC](https://en.wikipedia.org/wiki/WebRTC) in decentralized architectures today. It is compatible with underlying network protocols such as [TCP/IP](https://en.wikipedia.org/wiki/Internet_protocol_suite) or [QUIC](https://webrtc.org). Depending on the application, one layer above HOPR could be an optional storage / sync lauer which then enables e.g. chat application with longer-term message caching.
-
-Data packages produced by dApps may not just contain valuable data but may also reveal metadata that can be linked to real-world identities. On-chain privacy, for example, is of limited impact if a network observer can link metadata to a social media account in order to attack the person because of the fact *that* they used privacy-preserving financial networks - without knowing *what* exactly they used them for.
 
 <table>
     <thead>
@@ -70,6 +68,48 @@ Data packages produced by dApps may not just contain valuable data but may also 
         </tr>
     </tbody>
 </table>
+
+Data packages produced by dApps may not just contain valuable data but may also reveal metadata that can be linked to real-world identities. On-chain privacy, for example, is of limited impact if a network observer can link metadata to a social media account in order to attack the person because of the fact *that* they used privacy-preserving financial networks - without knowing *what* exactly they used them for.
+
+# How HOPR Meets the Objectives of the Community
+
+The [objectives of the community](https://medium.com/web3foundation/messaging-for-web-3-0-building-an-anonymous-messaging-protocol-e29db72f4d19) have been established with the involvement of various contributors and organizations in the blockchain and web3 ecosystem. Most of these objectives are primarily achieved through the message layer but one has to ensure that the implementation of the payment layer does not invalidate them.
+
+## Ensuring metadata protection:
+The HOPR message layer comprises a Chaumian mixnet. As such, no node in the network and no passive observer can tell if a certain node was sender or relayer of a message. Likewise, they cannot tell if a particular node was receiver or relayer of a message. This works as long as sender, relayer and recipient are subject to sufficient traffic so that they can mix their packages into the existing background package traffic. 
+As several nodes are relaying the traffic between sender and receiver, it is very hard to provide a link between the two and thus establish who is talking to who.
+
+The payment channels that HOPR leverages on the payment layer, are not settled on-chain after every package and thus privacy that was established by the message layer is maintained by the payment layer. The channels between sender-relayer,multiple relayers and between relayer and recipient are settled infrequently, e.g. on a monthly basis and therefore do not allow linking of payment- and message layer activities.
+
+Objectives that HOPR achieves:
+
+1. Sender anonymity (who sent a message?)
+2. Receiver anonymity (who read a message?)
+3. Sender-receiver unlinkability (who is talking to whom?)
+
+## Convenience, Usability:
+HOPR does not make assumptions about latency or anonymity and instead lets applications define these parameters. Higher latency provides for more efficient mixing of packages and thus increased anonymity but might not be suitable for all applications (e.g. instant messaging needs lower latencies than e.g. email services). The SPHINX package format that HOPR utilizes provides for high anonymity guarantees and at the same time contains overhead bandwidth. While traffic through HOPR will be significantly slower than direct communication due to the involvement of intermediate relay hops as well as additional artificial latencies to mix packets, the throughput of HOPR should allow for reasonable bandwidth to at least send several Kilobytes of traffic per second per sender. The payment layer aims at implementing efficient cryptography so that even low-energy devices are capable of sending, relaying and receiving traffic.
+
+Objectives that HOPR achieves:
+
+4. Reasonable latency (< 5 seconds, to allow for instant messaging)
+5. Reasonable bandwidth (not specified, ability to work with mobile data plan in undeveloped countries)
+6. Adaptable anonymity (adjustable pricing and resource consumption depending on how anonymous you want to be)
+
+## Decentralization:
+HOPR is a decentralized network without central points of failure and it allows anyone to join and use the services. It specifically does not rely on mailbox providers or other trusted parties. The message layer does require some on-chain activities for openening or closing/settling payment channels but existing public blockchains today (e.g. Ethereum) are easily capable of handling traffic of up to 1M nodes which would lead to several million transactions per month which arise from a few channel open and channel close transactions per node.
+
+Objectives that HOPR achieves:
+
+1. Scalable (up to ~1M active nodes)
+2. No Specialized Service Providers (pure peer-to-peer protocol)
+
+## Incentives to achieve mass adoption:
+The payment layer is an integral part of HOPR and provides incentives for relayers to get paid in proportion to the number of packages that they relayed.
+
+Objectives that HOPR achieves:
+
+9. Incentivization for relayers
 
 # Architecture overview
 
