@@ -252,7 +252,7 @@ Assume now that a relayer decreases the forwarded funds to the next node. More p
 
 In order to determine how many funds are destined to be paid to that node, they need to be able to find out at which position of the path they are. It is therefore the responsibility of the sender of the packet to specify how much money they intend to spend for each hop and embed this information in the part of the packet that is visible to the respective node. More precisely, the sender specifies how many funds in total each node receives from the previous node. As the nodes along the path drop the package once they consider the relay fees too low, the sender is incentivised to embed sufficient funds in the packet to make sure that the packet receives its desired destination.
 
-# Details of the Polkadot integration
+# Details of the Substrate implementation
 HOPR uses Substrate to implement the Polkadot integration. The application logic is similar to the one that [we have built for the Ethereum Virtual Machine (EVM)](https://github.com/validitylabs/hopr).
 
 ## General architecture
