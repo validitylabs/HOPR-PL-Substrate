@@ -308,7 +308,7 @@ That hop receives the packet and checks whether it is the designated recipient o
 
 The node also sends an acknowledgement back to the previous node which allows that node to compute the keys that are necessary to initate a payout of the corresponding payment channel.
 
-[<img height=450px src="img/HOPR-message-relay.svg">](img/HOPR-message-relay.svg)
+[<img height=450px src="img/HOPR-message-relay.svg">](img/HOPR-msg-relay.svg)
 
 ## Payment channels
 Each node need to keep track of its open payment channels to other nodes. Note that the assets are bound to the signatures of both participants once the payment channel has been opened. This means that in case one of the participants refuses any communication with the counterparty, the assets might get locked forever. Both of them therefore agree on a closing transaction that restores the previous asset distribution. That transaction has index *0* such that it can be published to the network in case something goes wrong. It loses its validity once both of them agree upon a subsequent transaction which has a higher index, e. g. *1* and one of them publishes the more recent transaction to the network.
