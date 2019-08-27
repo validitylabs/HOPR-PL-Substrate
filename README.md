@@ -10,7 +10,7 @@ Web3 is a stack of technologies that enable truly decentralized applications (dA
 2. Data storage solutions like [Filecoin](https://filecoin.io/) or [NuCypher](https://www.nucypher.com)
 3. Computation providers like [Golem](https://golem.network/) or [Enigma](https://enigma.co/)
 
-In this new ecosystem, multiple decentralised applications (dApps) interact with one another as well as with these core technologies. All pillars feature projects that focus on privacy within that domain. For example, we see on-chain privacy solutions such as [ZCash](https://z.cash/), [AZTEC](https://www.aztecprotocol.com/) on Ethereum or [SubstraTee](https://github.com/scs/substraTEE) for Substrate, privat data storage by re-encryption in NuCypher and privacy-preserving computation in Enigma. At the same time, the ecosystem is lacking a go-to solution for network-level privacy enabling communication between separate networks, applications and users. Some dApps make use of Whisper which is developed by the Ethereum community but which - similar to other broadcast schemes - suffers from scalability restrictions when used for point-to-point communication and unclear delivery behavior. We build HOPR as a metadata-privat communication foundation of the Web3.
+In this new ecosystem, multiple decentralized applications (dApps) interact with one another as well as with these core technologies. All pillars feature projects that focus on privacy within that domain. For example, we see on-chain privacy solutions such as [ZCash](https://z.cash/), [AZTEC](https://www.aztecprotocol.com/) on Ethereum or [SubstraTee](https://github.com/scs/substraTEE) for Substrate, private data storage by re-encryption in NuCypher and privacy-preserving computation in Enigma. At the same time, the ecosystem is lacking a go-to solution for network-level privacy enabling communication between separate networks, applications and users. Some dApps make use of Whisper which is developed by the Ethereum community but which - similar to other broadcast schemes - suffers from scalability restrictions when used for point-to-point communication and unclear delivery behavior. We build HOPR as a metadata-private communication foundation of the Web3.
 
 <table>
     <tbody>
@@ -31,7 +31,7 @@ In this new ecosystem, multiple decentralised applications (dApps) interact with
     </tbody>
 </table>
 
-HOPR fills the gap between p2p networks and dApps that exchange sensitive information. HOPR adds metadata privacy on top of an existing P2P layer that is used in form of [libp2p](https://libp2p.io) or [WebRTC](https://en.wikipedia.org/wiki/WebRTC) in decentralized architectures today. It is compatible with underlying network protocols such as [TCP/IP](https://en.wikipedia.org/wiki/Internet_protocol_suite) or [QUIC](https://webrtc.org). Depending on the application, one layer above HOPR could be an optional storage / sync lauer which then enables e.g. chat application with longer-term message caching.
+HOPR fills the gap between p2p networks and dApps that exchange sensitive information. HOPR adds metadata privacy on top of an existing P2P layer that is used in form of [libp2p](https://libp2p.io) or [WebRTC](https://en.wikipedia.org/wiki/WebRTC) in decentralized architectures today. It is compatible with underlying network protocols such as [TCP/IP](https://en.wikipedia.org/wiki/Internet_protocol_suite) or [QUIC](https://webrtc.org). Depending on the application, one layer above HOPR could be an optional storage / sync layer which then enables e.g. chat application with longer-term message caching.
 
 <table>
     <thead>
@@ -48,12 +48,12 @@ HOPR fills the gap between p2p networks and dApps that exchange sensitive inform
         </tr>
         <tr>
             <td>Storage / Sync</td>
-            <td>Synchronisation of data, version management, medium-term message caching</td>
+            <td>Synchronization of data, version management, medium-term message caching</td>
             <td><a href="https://matrix.org">Matrix</a></td>
         </tr>
         <tr>
             <td><b>Privacy</b></td>
-            <td>Scalable, decentralised metadata protection. Incentivisations for packet relayers and short-term packet caching</td>
+            <td>Scalable, decentralized metadata protection. Incentivization for packet relayers and short-term packet caching</td>
             <td><b>HOPR</b></td>
         </tr>
         <tr>
@@ -76,10 +76,9 @@ Data packages produced by dApps may not just contain valuable data but may also 
 The [objectives of the community](https://medium.com/web3foundation/messaging-for-web-3-0-building-an-anonymous-messaging-protocol-e29db72f4d19) have been established with the involvement of various contributors and organizations in the blockchain and web3 ecosystem. Most of these objectives are primarily achieved through the message layer but one has to ensure that the implementation of the payment layer does not invalidate them.
 
 ## Ensuring metadata protection:
-The HOPR message layer comprises a Chaumian mixnet. As such, no node in the network and no passive observer can tell if a certain node was sender or relayer of a message. Likewise, they cannot tell if a particular node was receiver or relayer of a message. This works as long as sender, relayer and recipient are subject to sufficient traffic so that they can mix their packages into the existing background package traffic. 
-As several nodes are relaying the traffic between sender and receiver, it is very hard to provide a link between the two and thus establish who is talking to who.
+The HOPR message layer comprises a Chaumian mixnet. As such, no node in the network and no passive observer can tell if a certain node was sender or relayer of a message. Likewise, they cannot tell if a particular node was receiver or relayer of a message. This works as long as sender, relayer and recipient are subject to sufficient traffic so that they can mix their packages into the existing background package traffic. As several nodes are relaying the traffic between sender and receiver, it is very hard to provide a link between the two and thus establish who is talking to who.
 
-The payment channels that HOPR leverages on the payment layer, are not settled on-chain after every package and thus privacy that was established by the message layer is maintained by the payment layer. The channels between sender-relayer,multiple relayers and between relayer and recipient are settled infrequently, e.g. on a monthly basis and therefore do not allow linking of payment- and message layer activities.
+The payment channels that HOPR leverages on the payment layer, are not settled on-chain after every package and thus privacy that was established by the message layer is maintained by the payment layer. The channels between sender-relayer, multiple relayers and between relayer and recipient are settled infrequently, e.g. on a monthly basis, and therefore make it difficult to link payment- and message layer activities. Relayers can choose when they want to settle, they might choose to do so frequently in order to have a constant revenue but on the other hand they would not settle too often as that comes at the cost of on-chain transaction fees. In addition, when settling for a very low number of relayed packages (worst case is all relayers of a path are settling after just one single package) closing the payment channel might leak some information about the path along which a certain package was routed. To prevent this and guarantee sufficient privacy, a certain amount of traffic should be routed along the relay nodes that are chosen for a particular packet before the corresponding payment channels are settled. It is the task of the sender of a package to choose a route via relay nodes that fulfill such conditions which are also deemed sufficiently trustworthy. As trust might be subjective, HOPR does not impose a strategy for establishing a path and instead allows the sender to choose relay nodes.
 
 Objectives that HOPR achieves:
 
@@ -97,7 +96,7 @@ Objectives that HOPR achieves:
 6. Adaptable anonymity (adjustable pricing and resource consumption depending on how anonymous you want to be)
 
 ## Decentralization:
-HOPR is a decentralized network without central points of failure and it allows anyone to join and use the services. It specifically does not rely on mailbox providers or other trusted parties. The message layer does require some on-chain activities for openening or closing/settling payment channels but existing public blockchains today (e.g. Ethereum) are easily capable of handling traffic of up to 1M nodes which would lead to several million transactions per month which arise from a few channel open and channel close transactions per node.
+HOPR is a decentralized network without central points of failure and it allows anyone to join and use the services. It specifically does not rely on mailbox providers or other trusted parties. The message layer does require some on-chain activities for opening or closing/settling payment channels but existing public blockchains today (e.g. Ethereum) are easily capable of handling traffic of up to 1M nodes which would lead to several million transactions per month which arise from a few channel open and channel close transactions per node.
 
 Objectives that HOPR achieves:
 
@@ -146,7 +145,7 @@ Metadata private data exchange requires the help of third parties participating 
 
 The main architectural objectives of HOPR are:
 - **simplicity**: The interactions with the blockchain should be as simple as possible to prevent mistakes in applications and to decrease the effort that is necessary to formally proof security properties of the system.
-- **efficiency**: As on-chain computation is costly, we prevent expensive operations like NIZK proof verification whereever we can and make use of second layer scalability solutions such as payment channels.
+- **efficiency**: As on-chain computation is costly, we prevent expensive operations like NIZK proof verification wherever we can and make use of second layer scalability solutions such as payment channels.
 
 The core design choices of HOPR are:
 - **happy path optimization**: In order to reduce overhead in the more common happy path of successful package delivery, we accept some efficiency reductions in the unhappy path.
@@ -166,7 +165,7 @@ In order to keep the on-chain transaction costs for opening and closing payment 
 
 ## What HOPR incentivizes
 
-The goal of the payment layer is to incentivise operations on the message layer. In order to do that, we specify those actions we want to pay nodes for:
+The goal of the payment layer is to incentivize operations on the message layer. In order to do that, we specify those actions we want to pay nodes for:
 - **correct transformation** of packets such that the next downstream nodes is able to perform their transformations on the received packets
 - **delivery of the packet** to the next node and caching the packet for a short timespan, e. g. 2 hours, until the next downstream node is able to receive the packet
 
@@ -192,7 +191,7 @@ In order to prevent Bob from faking `s_{total}` and thereby extracting a larger 
 
 In reality, not all packages are going to be successfully delivered. As a consequence, Bob will be missing some `s_b` from the packages that got lost or for which the downstream relay node was not responsive. In turn, Bob will not be able to submit a correct `s_{total}` matching the corresponding `S_{total}` for which he has a valid signature from Alice.
 
-For settlement of payment channels for which not all packages have been successfully delivered, a partial settlement needs to be available. Assume that for a total of `N` packages, the first `X` were succesfully delivered and the last `Y` failed so that `N = X + Y` (ordering of successfull and unsuccessful messages is irrelevant and only serves as a simple example). In analogy to the above we then have 
+For settlement of payment channels for which not all packages have been successfully delivered, a partial settlement needs to be available. Assume that for a total of `N` packages, the first `X` were successfully delivered and the last `Y` failed so that `N = X + Y` (ordering of successful and unsuccessful messages is irrelevant and only serves as a simple example). In analogy to the above we then have 
 
 `s_{success} = \sum_{i=0}^{Y} s_{i,a} + s_{i,b} = \sum_{i=0}^{Y} s_i`,
 
@@ -214,9 +213,9 @@ Then the smart contract:
 
 HOPR uses payment channels between adjacent nodes in the network and routes payments along these edges. 
 
-During the initialisation phase, each node crawls the network in order to find others who are also willing to speak the HOPR protocol. They then select from the set of received nodes a subset of nodes with whom they intend to establish a payment channel.
+During the initialization phase, each node crawls the network in order to find others who are also willing to speak the HOPR protocol. They then select from the set of received nodes a subset of nodes with whom they intend to establish a payment channel.
 
-Initialising a payment channel means that two participants agree on a certain amount of assets from each of them and lock these assets until both of them agree on how to distribute them. In case they do not find a consensus, they always have the chance to restore the original or latest stored status that is signed off from both sides. Once they agree on a new distribution, they both sign a message that encodes the new state and store this transaction until either one of them initiates a payout or they agree on another distribution.
+Initializing a payment channel means that two participants agree on a certain amount of assets from each of them and lock these assets until both of them agree on how to distribute them. In case they do not find a consensus, they always have the chance to restore the original or latest stored status that is signed off from both sides. Once they agree on a new distribution, they both sign a message that encodes the new state and store this transaction until either one of them initiates a payout or they agree on another distribution.
 
 State changes are incrementally numbered such that an honest node is able to convince the distributed ledger of the rightful most recent state of the payment channel. In order to give nodes that opportunity, each node listens to the payment channel closing event and is allowed to present a more recent transaction within a defined amount of time.
 
@@ -226,7 +225,7 @@ Every time a node considers an incoming packet valid, they peal off one layer of
 
 Therefore, they extract the secret *S^(n + 1, n + 2)* which denotes the shared secret between the next and the next but one node from the path. Note that it is the responsibility of the sender of the packet to include that secret in the packet header and that an invalid *S^(n + 1, n + 2)* causes a packet loss since the next downstream node drops the packet. The node then subtracts the relay fee from the received funds and updates the local state of the payment channel with the next downstream node.
 
-More precisely, they increment the current index of the payment channel to *index + 1*. They further subtract the relay fee from the received transaction and add the remainder to the balance of the next downstream. Note that this requires an honest behavior of that node. See section [Fairness mechanisms](#fairness-mechanisms) how they are incentivised to behave like that. They also extract *S^(n + 1, n + 2)_i* from the packet and add it to the sum *~S* of the previous secrets *S^(n + 1, n + 2)_i*. The signature is then computed as
+More precisely, they increment the current index of the payment channel to *index + 1*. They further subtract the relay fee from the received transaction and add the remainder to the balance of the next downstream. Note that this requires an honest behavior of that node. See section [Fairness mechanisms](#fairness-mechanisms) how they are incentivized to behave like that. They also extract *S^(n + 1, n + 2)_i* from the packet and add it to the sum *~S* of the previous secrets *S^(n + 1, n + 2)_i*. The signature is then computed as
 
 `Sig = Sign_A(nonce, index + 1, balance_A - remainder, balance_B, ~S + S^(n + 1, n + 2))`
 
@@ -238,7 +237,7 @@ Once a node receives a transaction, they can, as none of the embedded values is 
 
 The motivation for this mechanism is that the payment channel between a node and the next downstream node relies on the acknowledgments that this node receives from the downstream node to which it forwards the messages. More precisely, the settlement and therefore the payout depends on the behavior of third parties. As this contradicts the principle of a payment channel between exactly two parties, both nodes need to be able to settle their payment channel even when others do not acknowledge the reception of packet in time.
 
-Assume now that there is a set *J* that contains the indices of all packet that have not been acknowledged and the relayer only knows the corresponding values *S_i*. Let furter *I* be the set of all packets that have been acknowledged and the relayer knows the corresponding values *s_i*. Note that
+Assume now that there is a set *J* that contains the indices of all packet that have not been acknowledged and the relayer only knows the corresponding values *S_i*. Let further *I* be the set of all packets that have been acknowledged and the relayer knows the corresponding values *s_i*. Note that
 
 `sum(...s_i) * G + product(...S_j) = sum(...s_i) * G + sum(...s_j) * G = (sum(...s_i) + sum(...s_j)) * G = S`
 
@@ -248,9 +247,9 @@ In order to close a payment channel without having all acknowledgements, they pa
 
 As described in section [Updating the balance in a payment channel](#updating-the-balance-in-a-payment-channel), HOPR disincentivises nodes to decrease the forwarded relay fees. Note that they might increase the forwarded funds but as nodes in the HOPR network are assumed to behave rationally it is very unlikely that they do that.
 
-Assume now that a relayer decreases the forwarded funds to the next node. More precisely, the reward of the relayer is now higher than intended whilst the reward of next downstream nodes is lower than expected. The reason why the attack of the relayer is not going to be succesful is that they need the acknowledgement of the next downstream node to redeem the funds - which would not send the required acknowledgement unless they receive the expected amount of funds.
+Assume now that a relayer decreases the forwarded funds to the next node. More precisely, the reward of the relayer is now higher than intended whilst the reward of next downstream nodes is lower than expected. The reason why the attack of the relayer is not going to be successful is that they need the acknowledgement of the next downstream node to redeem the funds - which would not send the required acknowledgement unless they receive the expected amount of funds.
 
-In order to determine how many funds are destined to be paid to that node, they need to be able to find out at which position of the path they are. It is therefore the responsibility of the sender of the packet to specify how much money they intend to spend for each hop and embed this information in the part of the packet that is visible to the respective node. More precisely, the sender specifies how many funds in total each node receives from the previous node. As the nodes along the path drop the package once they consider the relay fees too low, the sender is incentivised to embed sufficient funds in the packet to make sure that the packet receives its desired destination.
+In order to determine how many funds are destined to be paid to that node, they need to be able to find out at which position of the path they are. It is therefore the responsibility of the sender of the packet to specify how much money they intend to spend for each hop and embed this information in the part of the packet that is visible to the respective node. More precisely, the sender specifies how many funds in total each node receives from the previous node. As the nodes along the path drop the package once they consider the relay fees too low, the sender is incentivized to embed sufficient funds in the packet to make sure that the packet receives its desired destination.
 
 # Details of the Substrate implementation
 HOPR uses Substrate to implement the Polkadot integration. The application logic is similar to the one that [we have built for the Ethereum Virtual Machine (EVM)](https://github.com/validitylabs/hopr).
@@ -286,12 +285,12 @@ The Substrate-based HOPR chain uses a custom application logic implemented in Ru
 - **Polkadot slot leasing:**
    There is a proper way to collect Dots, i. e. by swapping HOPR tokens into Dots in order to lease a slot in Polkadot and get Polkadot's "pooled security".
 
-- **Modularisation:**
-   HOPR is modularised in a common message layer and multiple payment layer modules - for now Polkadot and Ethereum. The implementations live in seperate repositories.
+- **Modularization:**
+   HOPR is modularized in a common message layer and multiple payment layer modules - for now Polkadot and Ethereum. The implementations live in separate repositories.
 
 # Process details
 
-## Initialisation
+## Initialization
 Once a party decides to be part of the HOPR network, they create or recover an identity from a private key. It then publishes that identity and the corresponding key to the network such that other participants are able to find them. The node then crawls the network. That crawling process serves two purposes: First, it helps the new node to discover other nodes in the network.
 The second argument comes from the fact that a global passive adversary might be able to observe which nodes are asked for other nodes and might be therefore able to determine which nodes might be known and which are unknown.
 
@@ -313,7 +312,7 @@ The node also sends an acknowledgement back to the previous node which allows th
 ## Payment channels
 Each node need to keep track of its open payment channels to other nodes. Note that the assets are bound to the signatures of both participants once the payment channel has been opened. This means that in case one of the participants refuses any communication with the counterparty, the assets might get locked forever. Both of them therefore agree on a closing transaction that restores the previous asset distribution. That transaction has index *0* such that it can be published to the network in case something goes wrong. It loses its validity once both of them agree upon a subsequent transaction which has a higher index, e. g. *1* and one of them publishes the more recent transaction to the network.
 
-For that reason, it is the responsability of the nodes, to store the most recent update transaction as well as the restore transaction as long as the payment channel remains open. Agressive nodes might also store the most profitable transaction and try to publish that transaction instead of the most recent transaction. Both of them publish in a ping-pong manner more recent transactions until they reach either the most recent transaction or a transaction with which both of them want to live.
+For that reason, it is the responsibility of the nodes, to store the most recent update transaction as well as the restore transaction as long as the payment channel remains open. Aggressive nodes might also store the most profitable transaction and try to publish that transaction instead of the most recent transaction. Both of them publish in a ping-pong manner more recent transactions until they reach either the most recent transaction or a transaction with which both of them want to live.
 
 ## Payout
 Once a node wants to settle all payment channels in order payout all funds that are in the HOPR network, it creates a payout transaction for each of their open payment channels using the payment module. The payment module consumes the received acknowledgements to compute the desired pre-image. Afterwards, the payment module forwards the transaction to the blockchain which checks via on-chain application logic if the transmitted transaction is valid.
@@ -341,7 +340,7 @@ Initiates the payment layer module and restores the information of the payment c
 Takes the address of the receiver and the desired payload and encodes that information in a proper HOPR packet. It automatically picks a route through the HOPR network and send the packet to the first hop. It also alters the payment channel to the first hop and transfer the relay fees to the hops on the route. It MUST return a promise that resolves once the first relay in the route acknowledges the forwarding of the packet.
 - `to` the HOPR address of the receiver
 - `msg` the payload
-- `strategyProvider.getRoute(from: Address, to: Address): Address[]` optional. Use a customised route-picking strategy. 
+- `strategyProvider.getRoute(from: Address, to: Address): Address[]` optional. Use a customized route-picking strategy. 
 
 ## receive((payload: Buffer | string) => _)
 Propagates the reception of a packet to the application layer.
@@ -378,7 +377,7 @@ Returns the amount of assets that are embedded in the given transaction.
 - `tx` the transaction to extract the transferred amount from
 
 ## initiatePayout(): Promise\<BigInt\>
-Initiates a payout of all payment channels. It MUST close all payment channels and resolve just when all payment channels are either closed or considered abandonned. It SHOULD return the amount of assets that has been received by the HOPR node.
+Initiates a payout of all payment channels. It MUST close all payment channels and resolve just when all payment channels are either closed or considered abandoned. It SHOULD return the amount of assets that has been received by the HOPR node.
 
 ## stakeFunds(amount: BigInt): Promise\<Receipt\>
 Locks funds in the application logic such that it is later available to open payment channels.
