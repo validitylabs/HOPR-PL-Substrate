@@ -1,3 +1,5 @@
+The HOPR code now lives as its own GitHub organization on http://github.com/hoprnet
+---
 # HOPR-PL-Substrate
 
 This document details a [HOPR](https://github.com/validitylabs/hopr) payment layer implementation in Substrate.
